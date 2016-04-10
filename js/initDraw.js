@@ -1,18 +1,24 @@
+
+// TODO: store all created rectangles in a collection. gotta keep track of those bad boys!
+
 function initDraw(canvas) {
-    var mouse = {
+    var rectangle = {
         x: 0,
         y: 0,
         startX: 0,
         startY: 0
     };
+
+    var rectangles = [];
+
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
         if (ev.pageX) { //Moz
-            mouse.x = ev.pageX + window.pageXOffset;
-            mouse.y = ev.pageY + window.pageYOffset;
+            rectangle.x = ev.pageX + window.pageXOffset;
+            rectangle.y = ev.pageY + window.pageYOffset;
         } else if (ev.clientX) { //IE
-            mouse.x = ev.clientX + document.body.scrollLeft;
-            mouse.y = ev.clientY + document.body.scrollTop;
+            rectangle.x = ev.clientX + document.body.scrollLeft;
+            rectangle.y = ev.clientY + document.body.scrollTop;
         }
     };
 
@@ -20,28 +26,40 @@ function initDraw(canvas) {
     canvas.onmousemove = function (e) {
         setMousePosition(e);
         if (element !== null) {
-            element.style.width = Math.abs(mouse.x - mouse.startX) + 'px';
-            element.style.height = Math.abs(mouse.y - mouse.startY) + 'px';
-            element.style.left = (mouse.x - mouse.startX < 0) ? mouse.x + 'px' : mouse.startX + 'px';
-            element.style.top = (mouse.y - mouse.startY < 0) ? mouse.y + 'px' : mouse.startY + 'px';
+            element.style.width = Math.abs(rectangle.x - rectangle.startX) + 'px';
+            element.style.height = Math.abs(rectangle.y - rectangle.startY) + 'px';
+            element.style.left = (rectangle.x - rectangle.startX < 0) ? rectangle.x + 'px' : rectangle.startX + 'px';
+            element.style.top = (rectangle.y - rectangle.startY < 0) ? rectangle.y + 'px' : rectangle.startY + 'px';
         }
     }
 
     canvas.onclick = function (e) {
         if (element !== null) {
+
+            rectangles.push(element);
+            console.log(rectangles);
+
             element = null;
             canvas.style.cursor = "default";
             console.log("finsihed.");
         } else {
             console.log("begun.");
-            mouse.startX = mouse.x;
-            mouse.startY = mouse.y;
+            rectangle.startX = rectangle.x;
+            rectangle.startY = rectangle.y;
             element = document.createElement('div');
-            element.className = 'rectangle'
-            element.style.left = mouse.x + 'px';
-            element.style.top = mouse.y + 'px';
-            canvas.appendChild(element)
+
+            var width = rand(1, 20);
+            element.style.border = width + "px dashed #FF0000";
+
+            element.className = 'rectangle';
+            element.style.left = rectangle.x + 'px';
+            element.style.top = rectangle.y + 'px';
+            canvas.appendChild(element);
             canvas.style.cursor = "crosshair";
         }
     }
+}
+
+function rand(min, max) {
+    return Math.random() * (max - min) + min;
 }
