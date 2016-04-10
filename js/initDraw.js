@@ -1,5 +1,25 @@
 
-// TODO: store all created rectangles in a collection. gotta keep track of those bad boys!
+// TODO:
+
+function Obj (dom, seed) {
+    this.dom = dom;
+    this.seed = seed;
+}
+Obj.prototype.fall = function() {
+    window.setInterval(function (context) {
+        context.dom.style.top = addPx(context.dom.style.top, 1);
+    }, this.seed + 100, this)
+}
+
+function addPx(pxString, n) {
+    return (parseInt(pxString) + n) + "px"
+}
+
+var objects = [];
+function addObject(o) {
+    objects.push(o);
+    console.log(objects);
+}
 
 function initDraw(canvas) {
     var rectangle = {
@@ -9,7 +29,6 @@ function initDraw(canvas) {
         startY: 0
     };
 
-    var rectangles = [];
 
     function setMousePosition(e) {
         var ev = e || window.event; //Moz || IE
@@ -36,8 +55,10 @@ function initDraw(canvas) {
     canvas.onclick = function (e) {
         if (element !== null) {
 
-            rectangles.push(element);
-            console.log(rectangles);
+            var o = new Obj(element);
+            o.fall();
+            var seed = rand(0, 100);
+            addObject(o, seed);
 
             element = null;
             canvas.style.cursor = "default";
