@@ -1,18 +1,69 @@
 
 // TODO:
 
+BOTTOM = 400;
+TOP = 15;
+LEFT = 15;
+RIGHT = 1000;
+
 function Obj (dom, seed) {
     this.dom = dom;
-    this.seed = seed;
-}
-Obj.prototype.fall = function() {
-    window.setInterval(function (context) {
-        context.dom.style.top = addPx(context.dom.style.top, 1);
-    }, this.seed + 100, this)
+
+    var seed = rand(-4, 4);
+
+    this.velocity_x = seed;
+    this.velocity_y = seed;
 }
 
-function addPx(pxString, n) {
-    return (parseInt(pxString) + n) + "px"
+Obj.prototype.setTop = function (t) {
+    this.dom.style.top = t + "px";
+}
+
+Obj.prototype.top = function () {
+    return parseInt(this.dom.style.top);
+}
+
+Obj.prototype.setLeft = function (l) {
+    this.dom.style.left = l + "px";
+}
+
+Obj.prototype.left = function () {
+    return parseInt(this.dom.style.left);
+}
+
+Obj.prototype.right = function () {
+    return this.left() + this.width() + this.borderThickness();
+}
+
+Obj.prototype.height = function () {
+    return parseInt(this.dom.style.height);
+}
+
+Obj.prototype.width = function () {
+    return parseInt(this.dom.style.width);
+}
+
+Obj.prototype.borderThickness = function () {
+    return parseInt(this.dom.style.border.split(" ")[0]);
+}
+
+Obj.prototype.bottom = function () {
+   return this.top() + this.height() + this.borderThickness(); 
+}
+
+Obj.prototype.tick = function() {
+    var clock = 60;
+    window.setInterval(function (context) {
+        context.setTop(context.top() + context.velocity_y);
+        context.setLeft(context.left() + context.velocity_x);
+        
+        if (context.bottom() >= BOTTOM || context.top() <= TOP) {
+            context.velocity_y *= -1;
+        }
+        if (context.right() >= RIGHT || context.left() <= LEFT) {
+            context.velocity_x *= -1;
+        }
+    }, clock, this);
 }
 
 var objects = [];
@@ -56,9 +107,8 @@ function initDraw(canvas) {
         if (element !== null) {
 
             var o = new Obj(element);
-            o.fall();
-            var seed = rand(0, 100);
-            addObject(o, seed);
+            o.tick();
+            addObject(o);
 
             element = null;
             canvas.style.cursor = "default";
