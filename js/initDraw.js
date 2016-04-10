@@ -6,13 +6,20 @@ TOP = 15;
 LEFT = 15;
 RIGHT = 1000;
 
+DRAWING = true;
+
 function Obj (dom, seed) {
+    var that = this;
     this.dom = dom;
+    this.dom.onclick = function () {
+        console.log("clicked");
+        var p = document.createElement("p");
+        p.innerHTML = "add some behavior";
+        that.dom.appendChild(p);
+    }
 
-    var seed = rand(-4, 4);
-
-    this.velocity_x = seed;
-    this.velocity_y = seed;
+    this.velocity_x = rand(-4, 4);
+    this.velocity_y = rand(-4, 4);
 }
 
 Obj.prototype.setTop = function (t) {
@@ -72,6 +79,14 @@ function addObject(o) {
     console.log(objects);
 }
 
+function keyEvent(event) {
+   console.log(event);
+    switch (event.code) {
+        case "KeyD":
+            DRAWING = !DRAWING;
+    }
+}
+
 function initDraw(canvas) {
     var rectangle = {
         x: 0,
@@ -113,7 +128,7 @@ function initDraw(canvas) {
             element = null;
             canvas.style.cursor = "default";
             console.log("finsihed.");
-        } else {
+        } else if (DRAWING) {
             console.log("begun.");
             rectangle.startX = rectangle.x;
             rectangle.startY = rectangle.y;
