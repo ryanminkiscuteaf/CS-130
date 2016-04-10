@@ -49,7 +49,7 @@ function initDraw(canvas) {
             element = document.createElement('div');
 
             var width = rand(1, 20);
-            element.style.border = width + "px dashed #FF0000";
+            element.style.border = width + "px solid #" + (Math.random()*0xFFFFFF<<0).toString(16);
 
             element.className = 'rectangle';
             element.style.left = rectangle.x + 'px';
