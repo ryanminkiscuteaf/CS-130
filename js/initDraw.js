@@ -2,7 +2,7 @@
 // TODO:
 
 BOTTOM = 400;
-TOP = 15;
+TOP = 30;
 LEFT = 15;
 RIGHT = 1000;
 
@@ -16,7 +16,7 @@ function Obj (dom, seed) {
         var p = document.createElement("p");
         p.innerHTML = "add some behavior";
         that.dom.appendChild(p);
-    }
+    };
 
     this.velocity_x = rand(-4, 4);
     this.velocity_y = rand(-4, 4);
@@ -24,11 +24,11 @@ function Obj (dom, seed) {
 
 Obj.prototype.setTop = function (t) {
     this.dom.style.top = t + "px";
-}
+};
 
 Obj.prototype.top = function () {
     return parseInt(this.dom.style.top);
-}
+};
 
 Obj.prototype.setLeft = function (l) {
     this.dom.style.left = l + "px";
@@ -108,6 +108,8 @@ function initDraw(canvas) {
     };
 
     var element = null;
+    
+    // every time the mouse moves, update the dimensions of the rectangle
     canvas.onmousemove = function (e) {
         setMousePosition(e);
         if (element !== null) {
@@ -121,15 +123,18 @@ function initDraw(canvas) {
     canvas.onclick = function (e) {
         if (element !== null) {
 
+            // finish drawing the rectangle
+            
             var o = new Obj(element);
             o.tick();
             addObject(o);
 
             element = null;
             canvas.style.cursor = "default";
-            console.log("finsihed.");
         } else if (DRAWING) {
-            console.log("begun.");
+            
+            // start drawing the rectangle
+            
             rectangle.startX = rectangle.x;
             rectangle.startY = rectangle.y;
             element = document.createElement('div');
@@ -149,3 +154,5 @@ function initDraw(canvas) {
 function rand(min, max) {
     return Math.random() * (max - min) + min;
 }
+
+initDraw(document.getElementById('canvas'));
