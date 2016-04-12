@@ -1,0 +1,27 @@
+{
+  "name": "conjurer",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lowellbander/conjurer.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lowellbander/conjurer/issues"
+  },
+  "homepage": "https://github.com/lowellbander/conjurer#readme",
+  "dependencies": {
+    "babel-preset-react": "^6.5.0",
+    "babelify": "^7.2.0",
+    "express": "^4.13.4",
+    "react": "^15.0.1",
+    "react-dom": "^15.0.1"
+  }
+}
