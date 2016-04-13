@@ -2,9 +2,9 @@
  * Created by lowellbander on 4/12/16.
  */
 
-var React = require('react');
-var ReactDOM = require('react-dom');
-var ReactCanvas = require('react-canvas');
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ReactCanvas from 'react-canvas';
 
 var Surface = ReactCanvas.Surface;
 var Image = ReactCanvas.Image;
@@ -37,5 +37,7 @@ var App = React.createClass({
     }
 });
 
-ReactDOM.render(<App />, document.getElementById('main'));
-
+ReactDOM.render(
+  <App />,
+  document.getElementById('main')
+)

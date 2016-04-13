@@ -27,8 +27,8 @@ module.exports = function(grunt) {
         hot: true,
         port: 8000,
         webpack: webpackConfig,
-        publicPath: 'dist/assets/',
-        contentBase: './<%= pkg.src %>'
+        publicPath: 'assets/',
+        contentBase: './<%= pkg.dist %>'
       },
 
       start: {
@@ -101,7 +101,7 @@ module.exports = function(grunt) {
     }
 
     grunt.task.run([
-      'open: dev',
+      'open:dev',
       'webpack-dev-server'
     ]);
   });
