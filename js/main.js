@@ -6,9 +6,34 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 var ReactCanvas = require('react-canvas');
 
+var Surface = ReactCanvas.Surface;
+var Image = ReactCanvas.Image;
+var Text = ReactCanvas.Text;
+
 var App = React.createClass({
     render: function () {
-        return (<p>Hello, world!</p>);
+        var surfaceWidth = window.innerWidth;
+        var surfaceHeight = window.innerHeight;
+        var textStyle = this.getTextStyle();
+
+        return (
+            <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
+                <Text style={textStyle}>
+                    Here is some text.
+                </Text>
+            </Surface>
+        );
+    },
+
+    getTextStyle: function () {
+        return {
+            top: 0,
+            left: 0,
+            width: window.innerWidth,
+            height: 20,
+            lineHeight: 20,
+            fontSize: 12
+        };
     }
 });
 
