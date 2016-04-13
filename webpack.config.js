@@ -7,7 +7,7 @@
 var webpack = require('webpack');
 
 module.exports = {
-  entry: './src/js/main.js',
+  entry: './src/js/Conjurer.js',
 
   output: {
     publicPath: './dist/assets/',
