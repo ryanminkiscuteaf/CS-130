@@ -30,9 +30,9 @@ var App = React.createClass({
             top: 0,
             left: 0,
             width: window.innerWidth,
-            height: 20,
+            height: 50,
             lineHeight: 20,
-            fontSize: 12
+            fontSize: 25
         };
     }
 });
