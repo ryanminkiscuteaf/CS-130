@@ -4,7 +4,7 @@
 
 var React = require('react');
 var ReactDOM = require('react-dom');
-//var ReactCanvas = require('react-canvas');
+var ReactCanvas = require('react-canvas');
 
 var App = React.createClass({
     render: function () {
