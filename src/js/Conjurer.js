@@ -10,7 +10,7 @@ var Surface = ReactCanvas.Surface;
 var Image = ReactCanvas.Image;
 var Text = ReactCanvas.Text;
 
-class Conjurer {
+class Conjurer extends React.Component {
   getTextStyle() {
     return {
       top: 0,
