@@ -6,6 +6,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactCanvas from 'react-canvas';
 
+import Test from './Test';
+
 var Surface = ReactCanvas.Surface;
 var Image = ReactCanvas.Image;
 var Text = ReactCanvas.Text;
@@ -32,6 +34,7 @@ class Conjurer extends React.Component {
         <Text style={textStyle}>
           Here is some text.
         </Text>
+        <Test />
       </Surface>
     );
   }
