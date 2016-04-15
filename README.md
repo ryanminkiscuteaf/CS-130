@@ -6,7 +6,7 @@ If you've tried to run this project before, please delete the node_modules direc
 ```
 cd conjurer/
 npm install
-grunt build
+grunt build # might need: npm install -g grunt-cli
 grunt serve
 ```
 
