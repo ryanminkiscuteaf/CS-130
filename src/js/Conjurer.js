@@ -34,7 +34,7 @@ class Conjurer extends React.Component {
         <Text style={textStyle}>
           Here is some text.
         </Text>
-        <Test />
+        <Test xCoord={0} yCoord={50}/>
       </Surface>
     );
   }
