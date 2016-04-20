@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactCanvas from 'react-canvas'
+import ReactCanvas from 'react-canvas';
 
 var Text = ReactCanvas.Text;
 
