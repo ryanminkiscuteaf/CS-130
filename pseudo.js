@@ -45,7 +45,19 @@ var AnObjectInPartsBin = React.createClass({
 var TheGlobalScene = React.createClass({
     getInitialState: function () {
         this.props.eventHandler.subscribe(DRAG_EVENT, function (e) {
-            // apend the new object to the current scene
-        })
+            // TODO: validate shape structure
+            this.setState({newShapes: this.state.newShapes.concat([e])});
+        });
+        return {
+            objects: [],
+            newShapes: []
+        };
+    },
+    render: function () {
+        <Surface>
+            <PartsBin />
+            {this.state.objects.map(obj => renderObj(obj))}
+            {this.state.newShapes.map(obj => renderObj(obj))}
+        </Surface>
     }
 });
