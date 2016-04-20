@@ -1,7 +1,6 @@
 .idea/
-node_modules/
-!.gitignore
-!node_modules/react-canvas/
+node_modules/*
+!node_modules/react-canvas
 *.swp
 bundle.js
 dist/
