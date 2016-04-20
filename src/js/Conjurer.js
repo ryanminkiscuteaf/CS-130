@@ -7,6 +7,8 @@ import ReactDOM from 'react-dom';
 import ReactCanvas from 'react-canvas';
 
 import Test from './Test';
+import DraggableCircle from './DraggableCircle';
+import Rectangle from './shapes/Rectangle';
 
 var Surface = ReactCanvas.Surface;
 var Image = ReactCanvas.Image;
@@ -35,6 +37,9 @@ class Conjurer extends React.Component {
           Here is some text.
         </Text>
         <Test xCoord={0} yCoord={50}/>
+
+        <Rectangle style={{top: 200, left: 300, width: 100, height: 200, borderWidth: 5}}/>
+        <DraggableCircle xCoord={50} yCoord={150}/>
       </Surface>
     );
   }
