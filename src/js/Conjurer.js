@@ -17,12 +17,14 @@ var Text = ReactCanvas.Text;
 var EventEmitter = require('wolfy87-eventemitter');
 var ee = new EventEmitter();
 
+var TEST_EVENT = "event handler test";
+
 class Conjurer extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {};
-    ee.addListener('foo', function() {console.log('foo called');});
+    ee.addListener(TEST_EVENT, function() {console.log('event handler seems to be working');});
   } 
     
   getTextStyle() {
@@ -41,7 +43,7 @@ class Conjurer extends React.Component {
     var surfaceHeight = window.innerHeight;
     var textStyle = this.getTextStyle();
 
-    ee.emitEvent('foo');
+    ee.emitEvent(TEST_EVENT);
 
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
