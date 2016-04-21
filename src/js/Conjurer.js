@@ -14,7 +14,17 @@ var Surface = ReactCanvas.Surface;
 var Image = ReactCanvas.Image;
 var Text = ReactCanvas.Text;
 
+var EventEmitter = require('wolfy87-eventemitter');
+var ee = new EventEmitter();
+
 class Conjurer extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {};
+    ee.addListener('foo', function() {console.log('foo called');});
+  } 
+    
   getTextStyle() {
     return {
       top: 0,
@@ -30,6 +40,8 @@ class Conjurer extends React.Component {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
     var textStyle = this.getTextStyle();
+
+    ee.emitEvent('foo');
 
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
