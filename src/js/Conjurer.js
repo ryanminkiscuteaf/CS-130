@@ -12,9 +12,10 @@ import DraggableCircle from './DraggableCircle';
 import Rectangle from './shapes/Rectangle';
 import Generic from './Generic';
 
-var Surface = ReactCanvas.Surface;
-var Image = ReactCanvas.Image;
-var Text = ReactCanvas.Text;
+let Surface = ReactCanvas.Surface;
+let Group = ReactCanvas.Group;
+let Image = ReactCanvas.Image;
+let Text = ReactCanvas.Text;
 
 var EventEmitter = require('wolfy87-eventemitter');
 var ee = new EventEmitter();
@@ -26,23 +27,42 @@ class Conjurer extends React.Component {
     super(props);
     this.state = {};
     ee.addListener(TEST_EVENT, function() {console.log('event handler seems to be working');});
+
+    // coordinate data for drawing shapes
+    this.x_orig = 0;
+    this.y_orig = 0;
+    this.x_curr = 0;
+    this.y_curr = 0;
+
+    this.dragref = 0;
   }
 
   componentWillMount() {
     this.state = {
-      objects: [
-        {
-          id: 1,
-          width: 100,
-          height: 50
-        },
-        {
-          id: 2,
-          width: 50,
-          height: 100
-        }
-      ]
+      isDrawing: false,
+      objects: []
     };
+  }
+
+  handleMouseDown(e) {
+    this.isDrawing = true;
+    this.x_orig = e.clientX;
+    this.y_orig = e.clientY;
+
+    this.setState({
+      objects: this.state.objects.concat(
+        {
+          id: this.dragref,
+          ref: this.dragref,
+          width: 180,
+          height: 180,
+          x: this.x_orig - 90,
+          y: this.y_orig - 90
+        }
+      )
+    });
+
+    this.dragref++;
   }
 
   getTextStyle() {
@@ -56,6 +76,15 @@ class Conjurer extends React.Component {
     };
   }
 
+  getWrapperStyle() {
+    return {
+      top: 0,
+      left: 0,
+      width: window.innerWidth,
+      height: window.innerHeight
+    };
+  }
+
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
@@ -65,28 +94,26 @@ class Conjurer extends React.Component {
 
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <Text style={textStyle}>
-          Here is some text.
-        </Text>
-        <Draggable xCoord={0} yCoord={50}>
-          <Test />
-        </Draggable>
-
-        <Rectangle style={{top: 200, left: 300, width: 100, height: 200, borderWidth: 5}}/>
-        <Draggable xCoord={50} yCoord={150}>
-          <DraggableCircle />
-        </Draggable>
-        {this.state.objects.map(function(obj) {
-          return (
-            <Generic
-              key={obj.id}
-              xCoord={50}
-              yCoord={50}
-              width={obj.width}
-              height={obj.height}
-            />
-          );
-        })}
+        <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
+          <Text style={textStyle}>
+            Here is some text.
+          </Text>
+          <Draggable xCoord={50} yCoord={150}>
+            <DraggableCircle />
+          </Draggable>
+          <Rectangle style={{top: 200, left: 300, width: 100, height: 200, borderWidth: 5}}/>
+          {this.state.objects.map(function(obj) {
+            return (
+              <DraggableCircle
+                key={obj.id}
+                xCoord={obj.x}
+                yCoord={obj.y}
+                width={obj.width}
+                height={obj.height}
+              />
+            );
+          })}
+        </Group>
       </Surface>
     );
   }
