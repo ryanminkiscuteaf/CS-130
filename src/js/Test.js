@@ -6,10 +6,21 @@ import DraggableComponent from './DraggableComponent';
 var Text = ReactCanvas.Text;
 
 class Test extends DraggableComponent {
+  componentWillMount() {
+    this.setState({
+      x: this.props.xCoord,
+      y: this.props.yCoord
+    });
+
+    if (this.props.hasOwnProperty('setDragSize')) {
+      this.props.setDragSize(window.innerWidth, 50);
+    }
+  }
+
   getTextStyle() {
     return {
-      top: this.state.y,
-      left: this.state.x,
+      top: this.props.yCoord,
+      left: this.props.xCoord,
       width: window.innerWidth,
       height: 50,
       lineHeight: 20,
@@ -21,16 +32,22 @@ class Test extends DraggableComponent {
     var textStyle = this.getTextStyle();
 
     return (
-      <Text
-        style={textStyle}
-        onMouseDown={this.handleMouseDown}
-        onMouseMove={this.handleMouseMove}
-        onMouseUp={this.handleMouseUp}
-      >
+      <Text style={textStyle}>
         hello world
       </Text>
     );
   }
+}
+
+Test.propTypes = {
+  xCoord: React.PropTypes.number.isRequired,
+  yCoord: React.PropTypes.number.isRequired,
+  setDragSize: React.PropTypes.func
+}
+
+Test.defaultProps = {
+  xCoord: 0,
+  yCoord: 0
 }
 
 export default Test;
