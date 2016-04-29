@@ -56,7 +56,9 @@ class Conjurer extends React.Component {
         </Draggable>
 
         <Rectangle style={{top: 200, left: 300, width: 100, height: 200, borderWidth: 5}}/>
-        <DraggableCircle xCoord={50} yCoord={150}/>
+        <Draggable xCoord={50} yCoord={150}>
+          <DraggableCircle />
+        </Draggable>
       </Surface>
     );
   }

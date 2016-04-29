@@ -1,11 +1,9 @@
 import React from 'react';
 import ReactCanvas from 'react-canvas'
 
-import DraggableComponent from './DraggableComponent';
-
 var Text = ReactCanvas.Text;
 
-class Test extends DraggableComponent {
+class Test extends React.Component {
   componentWillMount() {
     this.setState({
       x: this.props.xCoord,
