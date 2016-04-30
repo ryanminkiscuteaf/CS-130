@@ -56,8 +56,23 @@ class Conjurer extends React.Component {
           ref: this.dragref,
           width: 180,
           height: 180,
-          x: this.x_orig - 90,
-          y: this.y_orig - 90
+          x: this.x_orig,
+          y: this.y_orig,
+          shapes: [{
+            type: 'circle',
+            top: 10,
+            left: 10,
+            width: 50,
+            height: 50
+          },
+          {
+            type: 'circle',
+            top: 50,
+            left: 50,
+            width: 60,
+            height: 60
+          }
+          ]
         }
       )
     });
@@ -104,13 +119,14 @@ class Conjurer extends React.Component {
           <Rectangle style={{top: 200, left: 300, width: 100, height: 200, borderWidth: 5}}/>
           {this.state.objects.map(function(obj) {
             return (
-              <DraggableCircle
-                key={obj.id}
-                xCoord={obj.x}
-                yCoord={obj.y}
-                width={obj.width}
-                height={obj.height}
-              />
+              <Draggable xCoord={obj.x} yCoord={obj.y}>
+                <Generic
+                  key={obj.id}
+                  width={obj.width}
+                  height={obj.height}
+                  shapes={obj.shapes}
+                />
+              </Draggable>
             );
           })}
         </Group>

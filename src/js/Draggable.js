@@ -19,14 +19,16 @@ class Draggable extends React.Component {
   componentWillMount() {
     this.state = {
       x: this.props.xCoord,
-      y: this.props.yCoord
+      y: this.props.yCoord,
+      offset: [0, 0]
     }
   }
 
-  setDragSize(w, h) {
+  setDragSize(w, h, off_x = 0, off_y = 0) {
     this.setState({
       width: w,
-      height: h
+      height: h,
+      offset: [off_x, off_y]
     });
   }
 
@@ -59,8 +61,8 @@ class Draggable extends React.Component {
 
   getWrapperStyle() {
     return {
-      top: this.state.y,
-      left: this.state.x,
+      top: this.state.y + this.state.offset[1],
+      left: this.state.x + this.state.offset[0],
       width: this.state.width,
       height: this.state.height,
       backgroundColor: '#ff0000'
