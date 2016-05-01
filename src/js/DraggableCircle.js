@@ -1,17 +1,25 @@
 import React from 'react';
 import ReactCanvas from 'react-canvas';
-import DraggableComponent from './DraggableComponent';
+import Draggable from './Draggable';
 import Circle from './shapes/Circle';
 
-export default class DraggableCircle extends DraggableComponent {
+let Group = ReactCanvas.Group;
+
+class DraggableCircle extends React.Component {
+  componentWillMount() {
+    if (this.props.hasOwnProperty('setDragSize')) {
+      this.props.setDragSize(180, 180);
+    }
+  }
+
 	getCircleStyle() {
 		return {
-			top: this.state.y, 
-			left: this.state.x, 
+			top: this.props.yCoord,
+			left: this.props.xCoord,
 			width: 180,
 			height: 180,
-			backgroundColor: '#003fd1', 
-			borderColor: '#000', 
+			backgroundColor: '#003fd1',
+			borderColor: '#000',
 			borderWidth: 2,
 			//shadowColor: '#999',
 			//shadowOffsetX: 15,
@@ -24,12 +32,22 @@ export default class DraggableCircle extends DraggableComponent {
 		var circleStyle = this.getCircleStyle();
 
 		return (
-			<Circle 
-				style={circleStyle} 
-	        	onMouseDown={this.handleMouseDown}
-	    	  	onMouseMove={this.handleMouseMove}
-	    	  	onMouseUp={this.handleMouseUp} />
+      <Group>
+        <Circle style={circleStyle} />
+      </Group>
 		);
 	}
 }
 
+DraggableCircle.propTypes = {
+  xCoord: React.PropTypes.number.isRequired,
+  yCoord: React.PropTypes.number.isRequired,
+  setDragSize: React.PropTypes.func
+}
+
+DraggableCircle.defaultProps = {
+  xCoord: 0,
+  yCoord: 0
+}
+
+export default DraggableCircle;

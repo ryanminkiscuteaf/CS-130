@@ -15,10 +15,10 @@ class DraggableComponent extends React.Component {
   }
 
   componentWillMount() {
-    this.state = {
+    this.setState({
       x: this.props.xCoord,
       y: this.props.yCoord
-    }
+    });
   }
 
   debounce(func, wait) {
