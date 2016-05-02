@@ -45,7 +45,8 @@ class Conjurer extends React.Component {
     this.state = {
       isDrawing: false,
       objects: [],
-      clone: null
+      clone: null,
+      newShapes: []
     };
   }
 
@@ -57,8 +58,8 @@ class Conjurer extends React.Component {
     // Emit an event to parts bin to add a new item
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [this.getSampleGeneric()]);
 
-    /*this.setState({
-      objects: this.state.objects.concat(
+    this.setState({
+      newShapes: this.state.newShapes.concat(
         {
           id: this.dragref,
           ref: this.dragref,
@@ -72,21 +73,12 @@ class Conjurer extends React.Component {
             left: 10,
             width: 50,
             height: 50
-          }/*,
-          {
-            type: 'circle',
-            top: 50,
-            left: 50,
-            width: 60,
-            height: 60
-          }
-          */
-          ]
+          }]
         }
       )
     });
 
-    this.dragref++;*/
+    this.dragref++;
   }
 
   getPartsBinStyle() {
@@ -173,6 +165,25 @@ class Conjurer extends React.Component {
   shapes={obj.shapes} />
   */
 
+  renderChild(child) {
+    return (
+        <Draggable xCoord={child.x} yCoord={child.y}>
+          <Generic
+              key={child.id}
+              width={child.width}
+              height={child.height}
+              shapes={child.shapes}
+              constrain={true}
+              />
+        </Draggable>
+    );
+  }
+
+  saveNewShape() {
+    console.log("hallo");
+    console.log(this.state.newShapes);
+  }
+
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
@@ -184,20 +195,12 @@ class Conjurer extends React.Component {
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
         <PartsBin style={this.getPartsBinStyle()} items={sampleItems} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
-          {this.state.objects.map(function(obj) {
-            return (
-              <Draggable xCoord={obj.x} yCoord={obj.y}>
-                <Generic
-                  key={obj.id}
-                  width={obj.width}
-                  height={obj.height}
-                  shapes={obj.shapes}
-                  constrain={true}
-                />
-              </Draggable>
-            );
-          })}
-          <Button xCoord={10} yCoord={10}>
+          <Text style={textStyle}>
+            Here is some text.
+          </Text>
+          {this.state.objects.map(this.renderChild)}
+          {this.state.newShapes.map(this.renderChild)}
+          <Button xCoord={10} yCoord={10} onClick={this.saveNewShape.bind(this)}>
             <Generic
                 key={12321}
                 width={100}

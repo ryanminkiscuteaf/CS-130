@@ -57,6 +57,7 @@ class Button extends React.Component {
 
     handleMouseUp(e) {
         this.isLifted = false;
+        this.props.onClick();
     }
 
     getWrapperStyle() {
