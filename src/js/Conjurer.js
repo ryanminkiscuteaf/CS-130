@@ -58,24 +58,30 @@ class Conjurer extends React.Component {
     // Emit an event to parts bin to add a new item
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [this.getSampleGeneric()]);
 
+    var defaultShape = {
+      id: this.dragref,
+      ref: this.dragref,
+      width: 180,
+      height: 180,
+      x: this.x_orig,
+      y: this.y_orig,
+      shapes: [{
+        type: 'circle',
+        top: 0,
+        left: 0,
+        width: 50,
+        height: 50
+      }]
+    };
+    
+    var last = arr => arr.slice(-1).pop();
+    
+    var newObject = (this.state.objects.length === 0)
+      ? defaultShape
+      : last(this.state.objects);
+    
     this.setState({
-      newShapes: this.state.newShapes.concat(
-        {
-          id: this.dragref,
-          ref: this.dragref,
-          width: 180,
-          height: 180,
-          x: this.x_orig,
-          y: this.y_orig,
-          shapes: [{
-            type: 'circle',
-            top: 0,
-            left: 0,
-            width: 50,
-            height: 50
-          }]
-        }
-      )
+      newShapes: this.state.newShapes.concat(newObject)
     });
 
     this.dragref++;
@@ -220,7 +226,7 @@ class Conjurer extends React.Component {
           </Text>
           {this.state.objects.map(this.renderChild)}
           {this.state.newShapes.map(this.renderChild)}
-          <Button xCoord={10} yCoord={10} onClick={this.saveNewShape.bind(this)}>
+          <Button xCoord={260} yCoord={10} onClick={this.saveNewShape.bind(this)}>
             <Generic
                 key={12321}
                 width={100}
