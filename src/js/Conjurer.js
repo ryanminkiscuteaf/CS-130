@@ -119,14 +119,14 @@ class Conjurer extends React.Component {
           <Rectangle style={{top: 200, left: 300, width: 100, height: 200, borderWidth: 5}}/>
           {this.state.objects.map(function(obj) {
             return (
-              <Draggable xCoord={obj.x} yCoord={obj.y}>
-                <Generic
-                  key={obj.id}
-                  width={obj.width}
-                  height={obj.height}
-                  shapes={obj.shapes}
-                />
-              </Draggable>
+              <Generic
+                xCoord={obj.x}
+                yCoord={obj.y}
+                key={obj.id}
+                width={obj.width}
+                height={obj.height}
+                shapes={obj.shapes}
+              />
             );
           })}
         </Group>
