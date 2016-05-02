@@ -69,8 +69,8 @@ class Conjurer extends React.Component {
           y: this.y_orig,
           shapes: [{
             type: 'circle',
-            top: 10,
-            left: 10,
+            top: 0,
+            left: 0,
             width: 50,
             height: 50
           }]
@@ -182,6 +182,26 @@ class Conjurer extends React.Component {
   saveNewShape() {
     console.log("hallo");
     console.log(this.state.newShapes);
+    var minX =  Math.min(...this.state.newShapes.map(wrapper => wrapper.x));
+    var minY =  Math.min(...this.state.newShapes.map(wrapper => wrapper.y));
+    var newObject = {
+      id: this.dragref,
+      ref: this.dragref,
+      width: 180,
+      height: 180,
+      x: minX,
+      y: minY,
+      shapes: this.state.newShapes.slice().map(function (wrapper) {
+        var shape = wrapper.shapes[0];
+        shape.left = wrapper.x - minX;
+        shape.top = wrapper.y - minY;
+        return shape;
+      })
+    };
+    this.setState({
+      objects: this.state.objects.concat(newObject),
+      newShapes: []
+    });
   }
 
   render() {
