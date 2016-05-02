@@ -10,6 +10,8 @@ import Draggable from './Draggable';
 import Generic from './Generic';
 import PartsBin from './PartsBin';
 
+import Button from './Button';
+
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
 let Image = ReactCanvas.Image;
@@ -70,7 +72,7 @@ class Conjurer extends React.Component {
             left: 10,
             width: 50,
             height: 50
-          },
+          }/*,
           {
             type: 'circle',
             top: 50,
@@ -78,6 +80,7 @@ class Conjurer extends React.Component {
             width: 60,
             height: 60
           }
+          */
           ]
         }
       )
@@ -194,6 +197,20 @@ class Conjurer extends React.Component {
               </Draggable>
             );
           })}
+          <Button xCoord={10} yCoord={10}>
+            <Generic
+                key={12321}
+                width={100}
+                height={100}
+                shapes={[{
+            type: 'circle',
+            top: 10,
+            left: 10,
+            width: 50,
+            height: 50
+          }]}
+                />
+          </Button>
         </Group>
       </Surface>
     );

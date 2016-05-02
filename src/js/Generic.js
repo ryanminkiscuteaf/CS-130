@@ -170,6 +170,6 @@ Generic.defaultProps = {
   yCoord: 0,
   shapes: [],
   constrain: false
-}
+};
 
 export default Generic;
