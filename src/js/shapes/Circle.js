@@ -67,6 +67,7 @@ var Circle = ReactCanvas.createCanvasComponent({
   applyCustomProps: function (prevProps, props) {
     var style = props.style || {};
     var layer = this.node;
+
     layer.shadowColor = style.shadowColor || 0;
     layer.shadowOffsetX = style.shadowOffsetX || 0;
     layer.shadowOffsetY = style.shadowOffsetY || 0;
