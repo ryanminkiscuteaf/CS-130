@@ -136,7 +136,8 @@ class Generic extends React.Component {
                   left: pos_x + this.state.absolute_offset.x,
                   width: shape.width * this.ratio,
                   height: shape.height * this.ratio,
-                  borderWidth: 1
+                  borderWidth: 1,
+                  backgroundColor: shape.color || "#003fd1"
                 }}
               />
             );

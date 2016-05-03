@@ -20,6 +20,7 @@ class Draggable extends React.Component {
     this.state = {
       x: this.props.xCoord,
       y: this.props.yCoord,
+      onChange: this.props.onChange || function(){},
       offset: [0, 0]
     }
   }
@@ -57,6 +58,7 @@ class Draggable extends React.Component {
 
   handleMouseUp(e) {
     this.isLifted = false;
+    this.state.onChange(this.state.x, this.state.y);
   }
 
   getWrapperStyle() {

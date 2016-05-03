@@ -19,7 +19,6 @@ let Text = ReactCanvas.Text;
 
 let Event = require('./event/EventNames');
 let ee = require('./event/EventEmitter');
-let TEST_EVENT = "event handler test";
 
 let sampleItems = require('./SampleItems');
 
@@ -27,7 +26,6 @@ class Conjurer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
-    ee.addListener(TEST_EVENT, function() {console.log('event handler seems to be working');});
 
     // Listener for event from the Parts Bin
     ee.addListener(Event.PARTS_BIN_CLONE_ITEM_EVENT, this.cloneItem.bind(this));
@@ -37,6 +35,9 @@ class Conjurer extends React.Component {
     this.y_orig = 0;
     this.x_curr = 0;
     this.y_curr = 0;
+
+    this.updatePosition = this.updatePosition.bind(this);
+    this.renderChild = this.renderChild.bind(this);
 
     this.dragref = 0;
   }
@@ -79,12 +80,16 @@ class Conjurer extends React.Component {
     var newObject = (this.state.objects.length === 0)
       ? defaultShape
       : last(this.state.objects);
+
+    newObject.x = this.x_orig;
+    newObject.y = this.y_orig;
     
+    this.dragref++;
+
     this.setState({
       newShapes: this.state.newShapes.concat(newObject)
     });
 
-    this.dragref++;
   }
 
   getPartsBinStyle() {
@@ -171,9 +176,17 @@ class Conjurer extends React.Component {
   shapes={obj.shapes} />
   */
 
+  updatePosition(x, y, shape) {
+    shape.x = x;
+    shape.y = y;
+  }
+
   renderChild(child) {
+    var onChange = function (x, y) {
+      this.updatePosition(x, y, child);
+    }.bind(this);
     return (
-        <Draggable xCoord={child.x} yCoord={child.y}>
+        <Draggable xCoord={child.x} yCoord={child.y} onChange={onChange}>
           <Generic
               key={child.id}
               width={child.width}
@@ -186,8 +199,6 @@ class Conjurer extends React.Component {
   }
 
   saveNewShape() {
-    console.log("hallo");
-    console.log(this.state.newShapes);
     var minX =  Math.min(...this.state.newShapes.map(wrapper => wrapper.x));
     var minY =  Math.min(...this.state.newShapes.map(wrapper => wrapper.y));
     var newObject = {
@@ -209,13 +220,39 @@ class Conjurer extends React.Component {
       newShapes: []
     });
   }
+  
+  addAnchor() {
+    this.x_orig = 300;
+    this.y_orig = 200;
+
+    var anchor = {
+      id: this.dragref,
+      ref: this.dragref,
+      width: 180,
+      height: 180,
+      x: this.x_orig,
+      y: this.y_orig,
+      shapes: [{
+        type: 'circle',
+        top: 0,
+        left: 0,
+        width: 50,
+        height: 50,
+        color: "#903fd1"
+      }]
+    };
+
+    this.setState({
+      newShapes: this.state.newShapes.concat(anchor)
+    });
+
+    this.dragref++;
+  }
 
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
     var textStyle = this.getTextStyle();
-
-    ee.emitEvent(TEST_EVENT);
 
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
@@ -239,6 +276,20 @@ class Conjurer extends React.Component {
             height: 50
           }]}
                 />
+          </Button>
+          <Button xCoord={400} yCoord={10} onClick={this.addAnchor.bind(this)}>
+            <Generic
+                key={12321}
+                width={100}
+                height={100}
+                shapes={[{
+            type: 'circle',
+            top: 10,
+            left: 10,
+            width: 30,
+            height: 30
+          }]}
+            />
           </Button>
         </Group>
       </Surface>
