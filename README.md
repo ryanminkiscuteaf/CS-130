@@ -27,13 +27,15 @@ Please look at src/js/SampleItems.js to see the format of data the PartsBin acce
 You can pass a generic object with any size because the parts bin will automatically resize it AS LONG AS at least one of the shapes has "top = 0" and another one has "left = 0". The parts bin needs these two constraints to correctly calculate the size of the generic objects.
 
 The parts bin listens to three events:
+
 1. PARTS_BIN_ADD_ITEM_EVENT (Look at src/js/Conjurer.js for example on this)
 2. PARTS_BIN_REMOVE_ITEM_EVENT
 3. PARTS_BIN_REPLACE_ITEM_EVENT
 
 REMEMBER to use the global event emitter in src/js/event/EventEmitter.js and use the event names in src/js/event/EventNames.js.
 
-IMPORTANT: 
+IMPORTANT:
+ 
 - Currently parts bin uses Draggable Generic so don't drag the object out of the parts bin.
 - Click on the object to clone it.
 - Click anywhere on the screen to add a new object to the parts bin.
