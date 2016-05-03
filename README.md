@@ -34,5 +34,6 @@ The parts bin listens to three events:
 REMEMBER to use the global event emitter in src/js/event/EventEmitter.js and use the event names in src/js/event/EventNames.js.
 
 IMPORTANT: 
-- Currently parts bin uses Draggable Generic so don't drag the object out of the parts bin.- Click on the object to clone it. 
+- Currently parts bin uses Draggable Generic so don't drag the object out of the parts bin.
+- Click on the object to clone it.
 - Click anywhere on the screen to add a new object to the parts bin.
