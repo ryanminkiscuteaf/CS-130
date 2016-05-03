@@ -26,18 +26,19 @@ class Generic extends React.Component {
       width: this.props.width
     };
 
-    if (this.props.hasOwnProperty('setDragSize')) {
-      var box = this.calculateBoundingBox();
-      var size = box.size;
-      var offset = box.offset;
-      this.props.setDragSize(size[0], size[1], offset[0], offset[1]);
+    var box = this.calculateBoundingBox();
+    var size = box.size;
+    var offset = box.offset;
 
-      this.setState({
-        width: size[0],
-        height: size[1],
-        offset: offset
-      });
+    if (this.props.hasOwnProperty('setDragSize')) {
+      this.props.setDragSize(size[0], size[1], offset[0], offset[1]);
     }
+
+    this.setState({
+      width: size[0],
+      height: size[1],
+      offset: offset
+    });
   }
 
   addShape(shape) {

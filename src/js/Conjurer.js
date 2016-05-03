@@ -157,6 +157,19 @@ class Conjurer extends React.Component {
     this.dragref++;
   }
 
+  /*
+  REPLACE DRAGGABLE OBJECT IN RENDER WITH THIS GENERIC
+  BELOW IF YOU DONT WANT IT TO BE DRAGGABLE
+
+<Generic
+  xCoord={obj.x}
+  yCoord={obj.y}
+  key={obj.id}
+  width={obj.width}
+  height={obj.height}
+  shapes={obj.shapes} />
+  */
+
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
@@ -176,7 +189,7 @@ class Conjurer extends React.Component {
                   width={obj.width}
                   height={obj.height}
                   shapes={obj.shapes} />
-              </Draggable>          
+              </Draggable>
             );
           })}
         </Group>
