@@ -3,7 +3,7 @@
 import React from 'react';
 import ReactCanvas from 'react-canvas';
 
-import Draggable from '../Draggable';
+//import Draggable from '../Draggable';
 import Generic from '../Generic';
 
 var Group = ReactCanvas.Group;
@@ -34,15 +34,16 @@ class Item extends React.Component {
     this.calculateGenericAttributes();
   }
 
+  //width={this.state.width}
+  //height={this.state.height}
+
   renderGeneric() {
     return (
-      <Draggable xCoord={this.state.x} yCoord={this.state.y}>
-        <Generic
-          key={this.state.id}
-          width={this.state.width}
-          height={this.state.height}
-          shapes={this.state.shapes} />
-      </Draggable>
+      <Generic
+        key={this.state.id}
+        xCoord={this.state.x}
+        yCoord={this.state.y}
+        shapes={this.state.shapes} />
     );
   }
 

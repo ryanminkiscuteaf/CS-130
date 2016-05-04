@@ -186,8 +186,8 @@ class Conjurer extends React.Component {
               <Draggable xCoord={obj.x} yCoord={obj.y}>
                 <Generic
                   key={obj.id}
-                  width={50}
-                  height={220}
+                  width={obj.width}
+                  height={obj.height}
                   shapes={obj.shapes}
                   constrain={true}
                 />
