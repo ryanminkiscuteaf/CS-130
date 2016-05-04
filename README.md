@@ -36,6 +36,7 @@ REMEMBER to use the global event emitter in src/js/event/EventEmitter.js and use
 
 IMPORTANT:
  
-- Currently parts bin uses Draggable Generic so don't drag the object out of the parts bin.
+- Generic object must have a unique id
+- Internally, parts bin uses a MAP to store generic objects so adding two objects with the same id will result in the latter overwriting the former
 - Click on the object to clone it.
 - Click anywhere on the screen to add a new object to the parts bin.
