@@ -106,7 +106,6 @@ class Generic extends React.Component {
   }
 
   getStyle() {
-    console.log(this.state, this.props);
     let pos_x = (this.state.left + this.state.offset[0]) * this.ratio;
     let pos_y = (this.state.top + this.state.offset[1]) * this.ratio;
 
