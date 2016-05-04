@@ -11,10 +11,7 @@ class Generic extends React.Component {
   constructor() {
     super();
 
-    this.state = {
-      shapes: [],
-      anchors: []
-    };
+    this.ratio = 1;
 
     this.calculateBoundingBox = this.calculateBoundingBox.bind(this);
   }
@@ -22,40 +19,58 @@ class Generic extends React.Component {
   componentWillMount() {
     this.state = {
       shapes: this.props.shapes,
-      height: this.props.height,
-      width: this.props.width
+      top: this.props.yCoord,
+      left: this.props.xCoord
     };
 
     var box = this.calculateBoundingBox();
     var size = box.size;
     var offset = box.offset;
-
-    if (this.props.hasOwnProperty('setDragSize')) {
-      this.props.setDragSize(size[0], size[1], offset[0], offset[1]);
-    }
+    var absolute_offset = box.absolute_offset;
 
     this.setState({
       width: size[0],
       height: size[1],
-      offset: offset
+      offset: offset,
+      absolute_offset: absolute_offset
     });
+
+    if (this.props.hasOwnProperty('constrain') && this.props.constrain) {
+      let wFits = this.props.width / size[0];
+      let hFits = this.props.height / size[1];
+      let ratio = wFits > hFits ? hFits : wFits;
+      this.ratio = ratio;
+
+      // recalculate with new constraints
+      let newBox = this.calculateBoundingBox();
+      size = newBox.size;
+
+      this.setState({
+        width: size[0],
+        height: size[1],
+        absolute_offset: newBox.absolute_offset
+      });
+    }
+
+    // if this was instantiated by a draggable
+    if (this.props.hasOwnProperty('setDragSize')) {
+      this.props.setDragSize(size[0], size[1], offset[0] * this.ratio, offset[1] * this.ratio);
+      this.setState({
+        top: this.props.yCoord / this.ratio,
+        left: this.props.xCoord / this.ratio,
+        absolute_offset: {'x': 0, 'y': 0}
+      });
+    }
   }
 
-  addShape(shape) {
-    relative_x = this.props.xCoord - shape.left;
-    relative_y = this.props.yCoord - shape.top;
-
-    this.setState({
-      shapes: this.state.shapes.concat(
-        {
-          type: shape.type,
-          width: shape.width,
-          height: shape.height,
-          top: relative_y,
-          left: relative_x
-        }
-      )
-    });
+  componentWillReceiveProps(nextProps) {
+    // if this was instantiated by a draggable
+    if (this.props.hasOwnProperty('setDragSize')) {
+      this.setState({
+        top: nextProps.yCoord / this.ratio,
+        left: nextProps.xCoord / this.ratio
+      });
+    }
   }
 
   calculateBoundingBox() {
@@ -72,15 +87,32 @@ class Generic extends React.Component {
       if (shape.left + shape.width > max_x) { max_x = shape.left + shape.width; }
     }
 
+    max_x *= this.ratio;
+    max_y *= this.ratio;
+    min_x *= this.ratio;
+    min_y *= this.ratio;
+
     var size = [max_x - min_x, max_y - min_y];
     var offset = [min_x, min_y];
-    return {'size': size, 'offset': offset};
+
+    let pos_x = (this.state.left * this.ratio) + min_x;
+    let pos_y = (this.state.top * this.ratio) + min_y;
+    var abs_offset = {
+      'x': this.state.left - pos_x,
+      'y': this.state.top - pos_y
+    };
+
+    return {'size': size, 'offset': offset, 'absolute_offset': abs_offset};
   }
 
   getStyle() {
+    console.log(this.state, this.props);
+    let pos_x = (this.state.left + this.state.offset[0]) * this.ratio;
+    let pos_y = (this.state.top + this.state.offset[1]) * this.ratio;
+
     return {
-      top: this.props.yCoord + this.state.offset[1],
-      left: this.props.xCoord + this.state.offset[0],
+      top: pos_y + this.state.absolute_offset.y,
+      left: pos_x + this.state.absolute_offset.x,
       width: this.state.width,
       height: this.state.height,
       backgroundColor: '#00ff00'
@@ -94,14 +126,17 @@ class Generic extends React.Component {
       <Group style={objStyle}>
         {
           this.state.shapes.map(function(shape) {
+            let pos_x = (this.state.left + shape.left) * this.ratio;
+            let pos_y = (this.state.top + shape.top) * this.ratio;
+
             return (
               <Circle
                 key={shape.id}
                 style={{
-                  top: this.props.yCoord + shape.top,
-                  left: this.props.xCoord + shape.left,
-                  width: shape.width,
-                  height: shape.height,
+                  top: pos_y + this.state.absolute_offset.y,
+                  left: pos_x + this.state.absolute_offset.x,
+                  width: shape.width * this.ratio,
+                  height: shape.height * this.ratio,
                   borderWidth: 1
                 }}
               />
@@ -116,8 +151,8 @@ class Generic extends React.Component {
 Generic.propTypes = {
   xCoord: React.PropTypes.number.isRequired,
   yCoord: React.PropTypes.number.isRequired,
-  width: React.PropTypes.number.isRequired,
-  height: React.PropTypes.number.isRequired,
+  width: React.PropTypes.number,
+  height: React.PropTypes.number,
   shapes: React.PropTypes.arrayOf(
     React.PropTypes.shape({
       type: React.PropTypes.string.isRequired,
@@ -127,13 +162,15 @@ Generic.propTypes = {
       height: React.PropTypes.number.isRequired
     })
   ),
-  setDragSize: React.PropTypes.func
+  setDragSize: React.PropTypes.func,
+  constrain: React.PropTypes.bool
 };
 
 Generic.defaultProps = {
   xCoord: 0,
   yCoord: 0,
-  shapes: []
+  shapes: [],
+  constrain: false
 }
 
 export default Generic;

@@ -174,7 +174,7 @@ class Conjurer extends React.Component {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
     var textStyle = this.getTextStyle();
-    
+
     ee.emitEvent(TEST_EVENT);
 
     return (
@@ -186,9 +186,11 @@ class Conjurer extends React.Component {
               <Draggable xCoord={obj.x} yCoord={obj.y}>
                 <Generic
                   key={obj.id}
-                  width={obj.width}
-                  height={obj.height}
-                  shapes={obj.shapes} />
+                  width={50}
+                  height={220}
+                  shapes={obj.shapes}
+                  constrain={true}
+                />
               </Draggable>
             );
           })}
