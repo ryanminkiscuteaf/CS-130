@@ -56,9 +56,6 @@ class Conjurer extends React.Component {
     this.x_orig = e.clientX;
     this.y_orig = e.clientY;
 
-    // Emit an event to parts bin to add a new item
-    ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [this.getSampleGeneric()]);
-
     var defaultShape = {
       id: this.dragref,
       ref: this.dragref,
@@ -83,7 +80,9 @@ class Conjurer extends React.Component {
 
     newObject.x = this.x_orig;
     newObject.y = this.y_orig;
-    
+
+
+
     this.dragref++;
 
     this.setState({
@@ -198,7 +197,7 @@ class Conjurer extends React.Component {
     );
   }
 
-  saveNewShape() {
+  saveObject() {
     var minX =  Math.min(...this.state.newShapes.map(wrapper => wrapper.x));
     var minY =  Math.min(...this.state.newShapes.map(wrapper => wrapper.y));
     var newObject = {
@@ -215,6 +214,10 @@ class Conjurer extends React.Component {
         return shape;
       })
     };
+
+    // Emit an event to parts bin to add a new item
+    ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
+
     this.setState({
       objects: this.state.objects.concat(newObject),
       newShapes: []
@@ -256,14 +259,14 @@ class Conjurer extends React.Component {
 
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <PartsBin style={this.getPartsBinStyle()} items={sampleItems} />
+        <PartsBin style={this.getPartsBinStyle()} items={this.state.objects} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
           <Text style={textStyle}>
             Here is some text.
           </Text>
           {this.state.objects.map(this.renderChild)}
           {this.state.newShapes.map(this.renderChild)}
-          <Button xCoord={260} yCoord={10} onClick={this.saveNewShape.bind(this)}>
+          <Button xCoord={260} yCoord={10} onClick={this.saveObject.bind(this)}>
             <Generic
                 key={12321}
                 width={100}
