@@ -178,6 +178,8 @@ class Conjurer extends React.Component {
   updatePosition(x, y, shape) {
     shape.x = x;
     shape.y = y;
+    
+    debugger;
   }
 
   renderChild(child) {
@@ -261,9 +263,6 @@ class Conjurer extends React.Component {
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
         <PartsBin style={this.getPartsBinStyle()} items={this.state.objects} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
-          <Text style={textStyle}>
-            Here is some text.
-          </Text>
           {this.state.objects.map(this.renderChild)}
           {this.state.newShapes.map(this.renderChild)}
           <Button xCoord={260} yCoord={10} onClick={this.saveObject.bind(this)}>
@@ -298,6 +297,16 @@ class Conjurer extends React.Component {
       </Surface>
     );
   }
+}
+
+var getRight = function (obj) {
+  return obj.x
+      + Math.max(...obj.shapes.map(shape => shape.left + shape.width));
+}
+
+var getBottom = function (obj) {
+  return obj.y
+      + Math.max(...obj.shapes.map(shape => shape.top + shape.height));
 }
 
 ReactDOM.render(
