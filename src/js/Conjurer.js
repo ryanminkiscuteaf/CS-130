@@ -38,6 +38,7 @@ class Conjurer extends React.Component {
 
     this.updatePosition = this.updatePosition.bind(this);
     this.renderChild = this.renderChild.bind(this);
+    this.handleCollision = this.handleCollision.bind(this);
 
     this.dragref = 0;
   }
@@ -168,7 +169,46 @@ class Conjurer extends React.Component {
     shape.x = x;
     shape.y = y;
     
-    debugger;
+    // handle anchoring
+    var obj = shape;
+    this.handleCollision(obj);
+  }
+  
+  handleCollision(obj) {
+    // get obj's bounds
+    var left = obj.x;
+    var top = obj.y;
+    var right = getRight(obj);
+    var bottom = getBottom(obj);
+
+    function didCollide(candidate) {
+      // don't care if an item collides with itself
+      if (obj.id === candidate.id) return false;
+     
+      var collision = false;
+      // give shapes absolute coordinates
+      var shapes = candidate.shapes;
+      var coordinates = shapes.map(shape => ({x: shape.left + candidate.x, y: shape.top + candidate.y}))
+      // check to see if any of candidate's anchors are in obj's bounding rectangle
+      coordinates.forEach(function (coordinate) {
+        collision = collision || (
+                (coordinate.x > left)
+                && (coordinate.x < right)
+                && (coordinate.y > top)
+                && (coordinate.y < bottom)
+            )
+      })
+      return collision;
+    }
+
+    // loop through all objects in the scene
+    // if obj's bounds contains an anchor
+    //    then attach obj to that parent object
+    var collisions = this.state.objects.filter(didCollide)
+    if (collisions.length !== 0) {
+      console.log("collisions detected!");
+      console.log(collisions);
+    }
   }
 
   renderChild(child) {
