@@ -48,6 +48,7 @@ class Conjurer extends React.Component {
     this.state = {
       isDrawing: false,
       objects: [],
+      parts: [],
       clone: null,
       newShapes: []
     };
@@ -74,23 +75,11 @@ class Conjurer extends React.Component {
       }]
     };
     
-    var last = arr => arr.slice(-1).pop();
-    
-    var newObject = (this.state.objects.length === 0)
-      ? defaultShape
-      : last(this.state.objects);
-
-    newObject.x = this.x_orig;
-    newObject.y = this.y_orig;
-
-
-
     this.dragref++;
-
+    
     this.setState({
-      newShapes: this.state.newShapes.concat(newObject)
+      newShapes: this.state.newShapes.concat(defaultShape)
     });
-
   }
 
   getPartsBinStyle() {
@@ -211,6 +200,12 @@ class Conjurer extends React.Component {
   }
 
   saveObject() {
+    
+    if (this.state.newShapes.length === 0) {
+      console.log("no new shapes to save");
+      return;
+    }
+    
     var minX =  Math.min(...this.state.newShapes.map(wrapper => wrapper.x));
     var minY =  Math.min(...this.state.newShapes.map(wrapper => wrapper.y));
     var newObject = {
@@ -232,7 +227,7 @@ class Conjurer extends React.Component {
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
 
     this.setState({
-      objects: this.state.objects.concat(newObject),
+      parts: this.state.parts.concat(newObject),
       newShapes: []
     });
   }
@@ -274,7 +269,7 @@ class Conjurer extends React.Component {
 
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <PartsBin style={this.getPartsBinStyle()} items={this.state.objects} />
+        <PartsBin style={this.getPartsBinStyle()} items={this.state.parts} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
           <Text style={textStyle}>
             Here is some text.
