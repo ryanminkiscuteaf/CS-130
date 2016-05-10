@@ -11,7 +11,7 @@ import Generic from './Generic';
 import PartsBin from './PartsBin';
 
 import Button from './Button';
-import CodeEditor from './CodeEditor';
+//import CodeEditor from './CodeEditor';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
@@ -259,9 +259,7 @@ class Conjurer extends React.Component {
 
     this.dragref++;
   }
-
-  //<CodeEditor style={this.getCodeEditorStyle()} />
-
+//<CodeEditor style={this.getCodeEditorStyle()} />
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
