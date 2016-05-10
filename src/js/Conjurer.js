@@ -11,6 +11,7 @@ import Generic from './Generic';
 import PartsBin from './PartsBin';
 
 import Button from './Button';
+import CodeEditor from './CodeEditor';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
@@ -25,6 +26,7 @@ let sampleItems = require('./SampleItems');
 class Conjurer extends React.Component {
   constructor(props) {
     super(props);
+    console.log("HEY yo");
     this.state = {};
 
     // Listener for event from the Parts Bin
@@ -146,6 +148,17 @@ class Conjurer extends React.Component {
     };
   }
 
+  getCodeEditorStyle() {
+    return {
+      top: 100,
+      left: 300,
+      width: 400,
+      height: 300,
+      backgroundColor: "#000000",
+      textColor: "#ffffff"
+    };
+  }
+
   // Clone parts bin item given an emitted event
   cloneItem(item) {
     console.log("Clone item conjurer - id: " + item.id);
@@ -252,6 +265,8 @@ class Conjurer extends React.Component {
     this.dragref++;
   }
 
+  //<CodeEditor style={this.getCodeEditorStyle()} />
+
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
@@ -295,6 +310,9 @@ class Conjurer extends React.Component {
             />
           </Button>
         </Group>
+
+        
+
       </Surface>
     );
   }
