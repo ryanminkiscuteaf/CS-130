@@ -160,13 +160,20 @@ class Item extends React.Component {
     // Resize all the children of the generic
     var factor = side / maxSide;
     var resizedShapes = this.props.shapes.map(function(c) {
-      return {
+      /*return Object.assign(c, {
         type: c.type,
         top: c.top * factor,
         left: c.left * factor,
         width: c.width * factor,
         height: c.height * factor
-      };
+      });*/
+
+      c.top = c.top * factor;
+      c.left = c.left * factor;
+      c.width = c.width * factor;
+      c.height = c.height * factor;
+      
+      return c;
     });
 
     if (defWidth >= defHeight) {
