@@ -195,9 +195,6 @@ class Conjurer extends React.Component {
     var bottom = getBottom(obj);
 
     function didCollide(candidate) {
-      // don't care if an item collides with itself
-      if (obj.id === candidate.id) return false;
-     
       var collision = false;
       // give shapes absolute coordinates
       var shapes = candidate.shapes;
@@ -210,14 +207,17 @@ class Conjurer extends React.Component {
                 && (coordinate.y > top)
                 && (coordinate.y < bottom)
             )
-      })
+      });
       return collision;
     }
 
-    // loop through all objects in the scene
+    // get all other objects other than this one
+    var otherObjects = this.state.objects.filter(other => obj.id !== other.id);
+
+    // loop through all other objects in the scene
     // if obj's bounds contains an anchor
     //    then attach obj to that parent object
-    var collisions = this.state.objects.filter(didCollide)
+    var collisions = otherObjects.filter(didCollide);
     if (collisions.length !== 0) {
       console.log("collisions detected!");
       console.log(collisions);
