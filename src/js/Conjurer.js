@@ -158,30 +158,6 @@ class Conjurer extends React.Component {
     item.x = window.innerWidth/2;
     item.y = window.innerHeight/2;
 
-    this.x_orig = 300;
-    this.y_orig = 200;
-
-    // TEMP: manually adding a child before rendering to see if it renders
-    // TODO: this object definition is really similar to handleMouseDown's defaultShape, so the two should be unified
-    let CHILD_COLOR = "#ff0000";
-    var anchor = {
-      id: this.dragref,
-      ref: this.dragref,
-      width: 20,
-      height: 20,
-      x: this.x_orig,
-      y: this.y_orig,
-      shapes: [{
-        type: 'circle',
-        top: 0,
-        left: 0,
-        width: 50,
-        height: 50,
-        color: CHILD_COLOR
-      }]
-    };
-    //item.children = [anchor];
-
     this.setState({
       objects: this.state.objects.concat(item)
     });
@@ -262,8 +238,6 @@ class Conjurer extends React.Component {
     child.key = getNewKey();
     parent.children.push(child);
     
-    // TODO: need to modify state with this.setState, because might be necessary for triggering re-renders
-    
     var newObjects = this.state.objects.slice();
     newObjects.splice(
         newObjects.findIndex(obj => obj.id === parent.id),
@@ -272,9 +246,17 @@ class Conjurer extends React.Component {
         
     );
     
-    //debugger;
     this.setState({
       objects: newObjects
+    }, function () {
+      var killedChild = this.state.objects.slice();
+      killedChild.splice(
+          killedChild.findIndex(obj => obj.id === child.id),
+          1 // deleteCount
+      );
+      this.setState({
+        objects: killedChild
+      });
     });
   }
 
@@ -296,13 +278,7 @@ class Conjurer extends React.Component {
     }
 
     var children = (obj.children) ? obj.children.map(renderChild) : <Group/>;
-    console.log("children:");
-    console.log((Array.isArray(children)) ? children : "none");
-
     
-    // {children} might be overwriting the rendered generic above it?
-    // are {children} being rendered above the parent or instead of it?
-    // they were being rendered above it!
     return (
         <Draggable xCoord={obj.x} yCoord={obj.y} onChange={onChange}>
           <Generic
@@ -320,7 +296,7 @@ class Conjurer extends React.Component {
   saveObject() {
     
     if (this.state.newShapes.length === 0) {
-      console.log("no new shapes to save");
+      console.error("no new shapes to save");
       return;
     }
     
