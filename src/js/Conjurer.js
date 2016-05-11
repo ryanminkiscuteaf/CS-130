@@ -28,7 +28,6 @@ let ANCHOR_COLOR = "#903fd1";
 class Conjurer extends React.Component {
   constructor(props) {
     super(props);
-    console.log("HEY yo");
     this.state = {};
 
     // Listener for event from the Parts Bin
@@ -76,8 +75,7 @@ class Conjurer extends React.Component {
         left: 0,
         width: 50,
         height: 50
-      }],
-      children: []
+      }]
     };
     
     this.dragref++;
@@ -155,12 +153,34 @@ class Conjurer extends React.Component {
 
   // Clone parts bin item given an emitted event
   cloneItem(item) {
-    console.log("Clone item conjurer - id: " + item.id);
-
     item.id = this.dragref;
     item.ref = this.dragref;
     item.x = window.innerWidth/2;
     item.y = window.innerHeight/2;
+
+    this.x_orig = 300;
+    this.y_orig = 200;
+
+    // TEMP: manually adding a child before rendering to see if it renders
+    // TODO: this object definition is really similar to handleMouseDown's defaultShape, so the two should be unified
+    let CHILD_COLOR = "#ff0000";
+    var anchor = {
+      id: this.dragref,
+      ref: this.dragref,
+      width: 20,
+      height: 20,
+      x: this.x_orig,
+      y: this.y_orig,
+      shapes: [{
+        type: 'circle',
+        top: 0,
+        left: 0,
+        width: 50,
+        height: 50,
+        color: CHILD_COLOR
+      }]
+    };
+    //item.children = [anchor];
 
     this.setState({
       objects: this.state.objects.concat(item)
@@ -198,7 +218,7 @@ class Conjurer extends React.Component {
       top : obj.y,
       right : getRight(obj),
       bottom : getBottom(obj)
-    }
+    };
 
     function inBounds(point, bounds) {
       return ((point.x > bounds.left)
@@ -232,25 +252,30 @@ class Conjurer extends React.Component {
     if (collisions.length !== 0) {
       //should only be one collision
       if (collisions.length !== 1) throw "too many collisions";
-      
       var collision = collisions.pop();
-      console.log(collision);
-
       this.mount(obj, collision, newOrigin);
     } 
   }
   
   mount(child, parent, origin) {
     parent.children = parent.children || [];
+    child.key = getNewKey();
     parent.children.push(child);
     
-    // TODO: need to modify state with this.setState
+    // TODO: need to modify state with this.setState, because might be necessary for triggering re-renders
+    
+    var newObjects = this.state.objects.slice();
+    newObjects.splice(
+        newObjects.findIndex(obj => obj.id === parent.id),
+        1, // deleteCount
+        parent
+        
+    );
+    
     //debugger;
-    /*this.setState({
-      objects: this.state.objects.splice(
-          this.state.objects.findIndex()
-      )
-    })*/
+    this.setState({
+      objects: newObjects
+    });
   }
 
   renderObject(obj) {
@@ -271,8 +296,13 @@ class Conjurer extends React.Component {
     }
 
     var children = (obj.children) ? obj.children.map(renderChild) : <Group/>;
-    debugger;
+    console.log("children:");
+    console.log((Array.isArray(children)) ? children : "none");
 
+    
+    // {children} might be overwriting the rendered generic above it?
+    // are {children} being rendered above the parent or instead of it?
+    // they were being rendered above it!
     return (
         <Draggable xCoord={obj.x} yCoord={obj.y} onChange={onChange}>
           <Generic
@@ -339,8 +369,7 @@ class Conjurer extends React.Component {
         width: 50,
         height: 50,
         color: ANCHOR_COLOR
-      }],
-      children: []
+      }]
     };
 
     this.setState({
@@ -401,12 +430,15 @@ class Conjurer extends React.Component {
 var getRight = function (obj) {
   return obj.x
       + Math.max(...obj.shapes.map(shape => shape.left + shape.width));
-}
+};
 
 var getBottom = function (obj) {
   return obj.y
       + Math.max(...obj.shapes.map(shape => shape.top + shape.height));
-}
+};
+
+var OBJ_KEY = 0;
+var getNewKey = function () {return ++OBJ_KEY;};
 
 ReactDOM.render(
   <Conjurer />,
