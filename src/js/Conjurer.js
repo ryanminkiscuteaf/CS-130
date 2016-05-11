@@ -23,6 +23,8 @@ let ee = require('./event/EventEmitter');
 
 let sampleItems = require('./SampleItems');
 
+let ANCHOR_COLOR = "#903fd1";
+
 class Conjurer extends React.Component {
   constructor(props) {
     super(props);
@@ -195,20 +197,23 @@ class Conjurer extends React.Component {
     var bottom = getBottom(obj);
 
     function didCollide(candidate) {
-      var collision = false;
-      // give shapes absolute coordinates
-      var shapes = candidate.shapes;
-      var coordinates = shapes.map(shape => ({x: shape.left + candidate.x, y: shape.top + candidate.y}))
+      // get shapes that are anchors
+      var anchors = candidate.shapes.filter(shape => shape.color === ANCHOR_COLOR);
+
+      // get absolute coordinates for anchors
+      var coordinates = anchors.map(anchor => ({x: anchor.left + candidate.x, y: anchor.top + candidate.y}))
+
       // check to see if any of candidate's anchors are in obj's bounding rectangle
-      coordinates.forEach(function (coordinate) {
-        collision = collision || (
-                (coordinate.x > left)
-                && (coordinate.x < right)
-                && (coordinate.y > top)
-                && (coordinate.y < bottom)
-            )
-      });
-      return collision;
+      // side note : apparently this is how you do a for ... in in javascript
+      for (let coordinate of coordinates) {
+        if ((coordinate.x > left)
+            && (coordinate.x < right)
+            && (coordinate.y > top)
+            && (coordinate.y < bottom)) {
+          return true;
+        }
+      }
+      return false;
     }
 
     // get all other objects other than this one
@@ -221,6 +226,8 @@ class Conjurer extends React.Component {
     if (collisions.length !== 0) {
       console.log("collisions detected!");
       console.log(collisions);
+    } else {
+      console.log("no collisions");
     }
   }
 
@@ -291,7 +298,7 @@ class Conjurer extends React.Component {
         left: 0,
         width: 50,
         height: 50,
-        color: "#903fd1"
+        color: ANCHOR_COLOR
       }]
     };
 
