@@ -41,8 +41,9 @@ class Conjurer extends React.Component {
     this.y_curr = 0;
 
     this.updatePosition = this.updatePosition.bind(this);
-    this.renderChild = this.renderChild.bind(this);
+    this.renderObject = this.renderObject.bind(this);
     this.handleCollision = this.handleCollision.bind(this);
+    this.mount = this.mount.bind(this);
 
     this.dragref = 0;
   }
@@ -75,7 +76,8 @@ class Conjurer extends React.Component {
         left: 0,
         width: 50,
         height: 50
-      }]
+      }],
+      children: []
     };
     
     this.dragref++;
@@ -191,11 +193,22 @@ class Conjurer extends React.Component {
   
   handleCollision(obj) {
     // get obj's bounds
-    var left = obj.x;
-    var top = obj.y;
-    var right = getRight(obj);
-    var bottom = getBottom(obj);
+    var objBounds =  {
+      left : obj.x,
+      top : obj.y,
+      right : getRight(obj),
+      bottom : getBottom(obj)
+    }
 
+    function inBounds(point, bounds) {
+      return ((point.x > bounds.left)
+          && (point.x < bounds.right)
+          && (point.y > bounds.top)
+          && (point.y < bounds.bottom));
+    }
+    
+    var newOrigin = null;
+    
     function didCollide(candidate) {
       // get shapes that are anchors
       var anchors = candidate.shapes.filter(shape => shape.color === ANCHOR_COLOR);
@@ -206,44 +219,70 @@ class Conjurer extends React.Component {
       // check to see if any of candidate's anchors are in obj's bounding rectangle
       // side note : apparently this is how you do a for ... in in javascript
       for (let coordinate of coordinates) {
-        if ((coordinate.x > left)
-            && (coordinate.x < right)
-            && (coordinate.y > top)
-            && (coordinate.y < bottom)) {
+        if (inBounds(coordinate, objBounds)) {
+          newOrigin = coordinate;
           return true;
         }
       }
       return false;
     }
 
-    // get all other objects other than this one
-    var otherObjects = this.state.objects.filter(other => obj.id !== other.id);
+    var collisions = this.state.objects.filter(other => obj.id !== other.id).filter(didCollide);
 
-    // loop through all other objects in the scene
-    // if obj's bounds contains an anchor
-    //    then attach obj to that parent object
-    var collisions = otherObjects.filter(didCollide);
     if (collisions.length !== 0) {
-      console.log("collisions detected!");
-      console.log(collisions);
-    } else {
-      console.log("no collisions");
-    }
+      //should only be one collision
+      if (collisions.length !== 1) throw "too many collisions";
+      
+      var collision = collisions.pop();
+      console.log(collision);
+
+      this.mount(obj, collision, newOrigin);
+    } 
+  }
+  
+  mount(child, parent, origin) {
+    parent.children = parent.children || [];
+    parent.children.push(child);
+    
+    // TODO: need to modify state with this.setState
+    //debugger;
+    /*this.setState({
+      objects: this.state.objects.splice(
+          this.state.objects.findIndex()
+      )
+    })*/
   }
 
-  renderChild(child) {
+  renderObject(obj) {
     var onChange = function (x, y) {
-      this.updatePosition(x, y, child);
+      this.updatePosition(x, y, obj);
     }.bind(this);
-    return (
-        <Draggable xCoord={child.x} yCoord={child.y} onChange={onChange}>
+    
+    function renderChild(child) {
+      return (
           <Generic
               key={child.id}
               width={child.width}
               height={child.height}
               shapes={child.shapes}
               constrain={true}
+          />
+      )
+    }
+
+    var children = (obj.children) ? obj.children.map(renderChild) : <Group/>;
+    debugger;
+
+    return (
+        <Draggable xCoord={obj.x} yCoord={obj.y} onChange={onChange}>
+          <Generic
+              key={obj.id}
+              width={obj.width}
+              height={obj.height}
+              shapes={obj.shapes}
+              constrain={true}
               />
+          {children}
         </Draggable>
     );
   }
@@ -285,6 +324,7 @@ class Conjurer extends React.Component {
     this.x_orig = 300;
     this.y_orig = 200;
 
+    // TODO: this object definition is really similar to handleMouseDown's defaultShape, so the two should be unified
     var anchor = {
       id: this.dragref,
       ref: this.dragref,
@@ -299,7 +339,8 @@ class Conjurer extends React.Component {
         width: 50,
         height: 50,
         color: ANCHOR_COLOR
-      }]
+      }],
+      children: []
     };
 
     this.setState({
@@ -318,8 +359,8 @@ class Conjurer extends React.Component {
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
         <PartsBin style={this.getPartsBinStyle()} items={this.state.parts} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
-          {this.state.objects.map(this.renderChild)}
-          {this.state.newShapes.map(this.renderChild)}
+          {this.state.objects.map(this.renderObject)}
+          {this.state.newShapes.map(this.renderObject)}
           <Button xCoord={260} yCoord={10} onClick={this.saveObject.bind(this)}>
             <Generic
                 key={12321}
