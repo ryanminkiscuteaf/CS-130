@@ -201,7 +201,7 @@ class Conjurer extends React.Component {
       var anchors = candidate.shapes.filter(shape => shape.color === ANCHOR_COLOR);
 
       // get absolute coordinates for anchors
-      var coordinates = anchors.map(anchor => ({x: anchor.left + candidate.x, y: anchor.top + candidate.y}))
+      var coordinates = anchors.map(anchor => ({x: anchor.left + candidate.x, y: anchor.top + candidate.y}));
 
       // check to see if any of candidate's anchors are in obj's bounding rectangle
       // side note : apparently this is how you do a for ... in in javascript
