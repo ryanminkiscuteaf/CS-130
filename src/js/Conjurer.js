@@ -178,12 +178,9 @@ class Conjurer extends React.Component {
   shapes={obj.shapes} />
   */
 
-  updatePosition(x, y, shape) {
-    shape.x = x;
-    shape.y = y;
-    
-    // handle anchoring
-    var obj = shape;
+  updatePosition(x, y, obj) {
+    obj.x = x;
+    obj.y = y;
     this.handleCollision(obj);
   }
   
@@ -216,7 +213,7 @@ class Conjurer extends React.Component {
       // side note : apparently this is how you do a for ... in in javascript
       for (let coordinate of coordinates) {
         if (inBounds(coordinate, objBounds)) {
-          newOrigin = coordinate;
+          newOrigin = {x: coordinate.x - candidate.x, y: coordinate.y - candidate.y};
           return true;
         }
       }
@@ -236,14 +233,18 @@ class Conjurer extends React.Component {
   mount(child, parent, origin) {
     parent.children = parent.children || [];
     child.key = getNewKey();
+    // TODO: weird things are happening in the partsbin, so maybe i need to copy values to kill references
+    child.shapes = child.shapes.map(function(shape) {
+      shape.left += origin.x;
+      shape.top += origin.y;
+      return shape;
+    });
     parent.children.push(child);
-    
     var newObjects = this.state.objects.slice();
     newObjects.splice(
         newObjects.findIndex(obj => obj.id === parent.id),
         1, // deleteCount
         parent
-        
     );
     
     this.setState({
