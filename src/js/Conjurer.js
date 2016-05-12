@@ -185,7 +185,8 @@ class Conjurer extends React.Component {
     obj.y = y;
     this.handleCollision(obj);
   }
-  
+
+  // TODO: check for collisions on both this.state.objects and their children, recursively, to allow for grandchildren
   handleCollision(obj) {
     // get obj's bounds
     var objBounds =  {
@@ -222,27 +223,29 @@ class Conjurer extends React.Component {
       return false;
     }
 
-    var collisions = this.state.objects.filter(other => obj.id !== other.id).filter(didCollide);
-
-    if (collisions.length !== 0) {
-      //should only be one collision
-      if (collisions.length !== 1) throw "too many collisions";
-      var collision = collisions.pop();
-      this.mount(obj, collision, newOrigin);
-    } 
+    var getCollision = function (candidates) {
+      var collision = candidates.find(didCollide);
+      return collision;
+    };
+    
+    var collision = getCollision(this.state.objects.filter(other => obj.id !== other.id));
+    this.mount(obj, collision, newOrigin);
   }
+  
   
   mount(child, parent, origin) {
     parent.children = parent.children || [];
     child = copyObj(child);
     child.key = getNewKey();
-    // TODO: weird things are happening in the partsbin, so maybe i need to copy values to kill references
+    
+    // update the relative position of the child's shapes
     child.shapes = child.shapes.map(function(shape) {
       shape.left += origin.x;
       shape.top += origin.y;
       return shape;
     });
     parent.children.push(child);
+    
     var newObjects = this.state.objects.slice();
     newObjects.splice(
         newObjects.findIndex(obj => obj.id === parent.id),
