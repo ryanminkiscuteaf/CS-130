@@ -229,7 +229,10 @@ class Conjurer extends React.Component {
     };
     
     var collision = getCollision(this.state.objects.filter(other => obj.id !== other.id));
-    this.mount(obj, collision, newOrigin);
+    if (collision) {
+      this.mount(obj, collision, newOrigin);
+    }
+    return;
   }
   
   
