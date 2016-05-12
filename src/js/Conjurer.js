@@ -24,6 +24,7 @@ let ee = require('./event/EventEmitter');
 let sampleItems = require('./SampleItems');
 
 let ANCHOR_COLOR = "#903fd1";
+let DEFAULT_COLOR = "#0000ff";
 
 class Conjurer extends React.Component {
   constructor(props) {
@@ -74,7 +75,8 @@ class Conjurer extends React.Component {
         top: 0,
         left: 0,
         width: 50,
-        height: 50
+        height: 50,
+        color: DEFAULT_COLOR
       }]
     };
     
@@ -232,6 +234,7 @@ class Conjurer extends React.Component {
   
   mount(child, parent, origin) {
     parent.children = parent.children || [];
+    child = copyObj(child);
     child.key = getNewKey();
     // TODO: weird things are happening in the partsbin, so maybe i need to copy values to kill references
     child.shapes = child.shapes.map(function(shape) {
@@ -402,6 +405,30 @@ class Conjurer extends React.Component {
       </Surface>
     );
   }
+}
+
+var copyShape = function(shape) {
+  return {
+    type: shape.type,
+    top: shape.top,
+    left: shape.left,
+    width: shape.width,
+    height: shape.height,
+    color: shape.color
+  };
+}
+
+var copyObj = function(obj) {
+  return {
+    id: obj.id,
+    ref: obj.ref,
+    width: obj.width,
+    heigh: obj.height,
+    x: obj.x,
+    y: obj.y,
+    shapes: obj.shapes.map(copyShape)
+  };
+  // TODO: copy children
 }
 
 var getRight = function (obj) {
