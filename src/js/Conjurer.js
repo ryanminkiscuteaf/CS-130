@@ -11,6 +11,7 @@ import Generic from './Generic';
 import PartsBin from './PartsBin';
 
 import Button from './Button';
+import Obj from './Obj';
 //import CodeEditor from './CodeEditor';
 
 let Surface = ReactCanvas.Surface;
@@ -75,7 +76,7 @@ class Conjurer extends React.Component {
     this.y_orig = e.clientY;
 
     // TODO: abstract out to factory
-    var obj = makeObj({
+    var obj = new Obj({
       id: this.dragref,
       ref: this.dragref,
       x: this.x_orig,
@@ -449,6 +450,7 @@ class Conjurer extends React.Component {
   }
 }
 
+// TODO: make an Obj class
 // TODO: abstract out to factory
 var makeObj = function ({id, ref, x, y, shapes}={}) {
   return {
