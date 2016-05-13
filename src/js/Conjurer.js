@@ -26,6 +26,15 @@ let sampleItems = require('./SampleItems');
 let ANCHOR_COLOR = "#903fd1";
 let DEFAULT_COLOR = "#0000ff";
 
+let CIRCLE_SHAPE = {
+  type: 'circle',
+  top: 0,
+  left: 0,
+  width: 50,
+  height: 50,
+  color: DEFAULT_COLOR
+};
+
 class Conjurer extends React.Component {
   constructor(props) {
     super(props);
@@ -37,6 +46,8 @@ class Conjurer extends React.Component {
     // coordinate data for drawing shapes
     this.x_orig = 0;
     this.y_orig = 0;
+    
+    // TODO: these are unused, so delete them
     this.x_curr = 0;
     this.y_curr = 0;
 
@@ -63,7 +74,16 @@ class Conjurer extends React.Component {
     this.x_orig = e.clientX;
     this.y_orig = e.clientY;
 
-    var defaultShape = {
+    // TODO: abstract out to factory
+    var obj = makeObj({
+      id: this.dragref,
+      ref: this.dragref,
+      x: this.x_orig,
+      y: this.y_orig,
+      shapes: [CIRCLE_SHAPE]
+    }); 
+    
+    /*var defaultShape = {
       id: this.dragref,
       ref: this.dragref,
       width: 180,
@@ -78,12 +98,12 @@ class Conjurer extends React.Component {
         height: 50,
         color: DEFAULT_COLOR
       }]
-    };
+    };*/
     
     this.dragref++;
     
     this.setState({
-      newShapes: this.state.newShapes.concat(defaultShape)
+      newShapes: this.state.newShapes.concat(obj)
     });
   }
 
@@ -207,6 +227,7 @@ class Conjurer extends React.Component {
     
     function didCollide(candidate) {
       // get shapes that are anchors
+      // TODO: cannot read property 'shapes' of undefined
       var anchors = candidate.shapes.filter(shape => shape.color === ANCHOR_COLOR);
 
       // get absolute coordinates for anchors
@@ -224,20 +245,21 @@ class Conjurer extends React.Component {
     }
 
     var getCollision = function (candidates) {
+      if (candidates.length === 0) return null;
       var collision = candidates.find(didCollide);
-      return collision;
+      return collision
+          ? collision
+          : getCollision([].concat(...candidates.map(c => c.children)));
     };
     
     var collision = getCollision(this.state.objects.filter(other => obj.id !== other.id));
     if (collision) {
       this.mount(obj, collision, newOrigin);
     }
-    return;
   }
   
-  
   mount(child, parent, origin) {
-    parent.children = parent.children || [];
+    //parent.children = parent.children || [];
     child = copyObj(child);
     child.key = getNewKey();
     
@@ -312,7 +334,19 @@ class Conjurer extends React.Component {
     
     var minX =  Math.min(...this.state.newShapes.map(wrapper => wrapper.x));
     var minY =  Math.min(...this.state.newShapes.map(wrapper => wrapper.y));
-    var newObject = {
+    var newObject = makeObj({
+      id: this.dragref,
+      ref: this.dragref,
+      x: minX,
+      y: minY,
+      shapes: this.state.newShapes.slice().map(function (wrapper) {
+        var shape = wrapper.shapes[0];
+        shape.left = wrapper.x - minX;
+        shape.top = wrapper.y - minY;
+        return shape;
+      })
+    });
+    /*}var newObject = {
       id: this.dragref,
       ref: this.dragref,
       width: 180,
@@ -325,7 +359,9 @@ class Conjurer extends React.Component {
         shape.top = wrapper.y - minY;
         return shape;
       })
-    };
+    };*/
+    
+    // TODO: the two calls below are doing the same thing?
 
     // Emit an event to parts bin to add a new item
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
@@ -413,6 +449,20 @@ class Conjurer extends React.Component {
   }
 }
 
+// TODO: abstract out to factory
+var makeObj = function ({id, ref, x, y, shapes}={}) {
+  return {
+    id: id,
+    ref: ref,
+    width: 180,
+    height: 180,
+    x: x,
+    y: y,
+    children: [],
+    shapes: shapes
+  };
+};
+
 var copyShape = function(shape) {
   return {
     type: shape.type,
@@ -422,20 +472,21 @@ var copyShape = function(shape) {
     height: shape.height,
     color: shape.color
   };
-}
+};
 
 var copyObj = function(obj) {
+  debugger;
   return {
     id: obj.id,
     ref: obj.ref,
     width: obj.width,
-    heigh: obj.height,
+    height: obj.height,
     x: obj.x,
     y: obj.y,
-    shapes: obj.shapes.map(copyShape)
+    shapes: obj.shapes.map(copyShape),
+    children: obj.children.map(copyObj)
   };
-  // TODO: copy children
-}
+};
 
 var getRight = function (obj) {
   return obj.x
