@@ -8,7 +8,7 @@ class Obj {
         this.x = x;
         this.y = y;
         this.shapes = shapes;
-    };
+    }
     
     copy () {
         function copyShape (shape) {
@@ -31,7 +31,30 @@ class Obj {
             shapes: this.shapes.map(copyShape),
             children: this.children.map(this.copy)
         };
-    };
+    }
+    
+    right () {
+        return this.x
+            + Math.max(...this.shapes.map(shape => shape.left + shape.width));
+    }
+    
+    bottom () {
+        return this.y
+            + Math.max(...this.shapes.map(shape => shape.top + shape.height));
+    }
+
+    inBounds(point) {
+        var bounds =  {
+            left : this.x,
+            top : this.y,
+            right : this.right(),
+            bottom : this.bottom()
+        };
+        return ((point.x > bounds.left)
+            && (point.x < bounds.right)
+            && (point.y > bounds.top)
+            && (point.y < bounds.bottom));
+    }
 }
 
 export default Obj;
