@@ -41,6 +41,7 @@ class PartsBin extends React.Component {
 		console.log("Add item to parts bin");
 		
 		this.setState({
+			// TODO: no-op?
 			clone: this.state.clone,
 			items: this.state.items.set(item.id, item)
 		});
@@ -80,7 +81,7 @@ class PartsBin extends React.Component {
 
 		return (
 			<Item
-				parentTop={this.props.style.top} 
+				parentTop={this.props.style.top}
 				parentLeft={this.props.style.left}
 				width={this.props.style.width}
 				height={this.getItemHeight()}

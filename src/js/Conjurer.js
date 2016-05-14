@@ -16,12 +16,15 @@ import Obj from './Obj';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
+// TODO: remove this if it is unused
 let Image = ReactCanvas.Image;
+// TODO: remove this if it is unused
 let Text = ReactCanvas.Text;
 
 let Event = require('./event/EventNames');
 let ee = require('./event/EventEmitter');
 
+// TODO: remove this if it is unused
 let sampleItems = require('./SampleItems');
 
 let ANCHOR_COLOR = "#903fd1";
@@ -84,23 +87,6 @@ class Conjurer extends React.Component {
       shapes: [CIRCLE_SHAPE]
     }); 
     
-    /*var defaultShape = {
-      id: this.dragref,
-      ref: this.dragref,
-      width: 180,
-      height: 180,
-      x: this.x_orig,
-      y: this.y_orig,
-      shapes: [{
-        type: 'circle',
-        top: 0,
-        left: 0,
-        width: 50,
-        height: 50,
-        color: DEFAULT_COLOR
-      }]
-    };*/
-    
     this.dragref++;
     
     this.setState({
@@ -120,6 +106,7 @@ class Conjurer extends React.Component {
     };
   }
 
+  // TODO: remove this if it is unused
   getSampleGeneric() {
     var id = Math.floor((Math.random() * 1000) + 1);
     return {
@@ -163,6 +150,7 @@ class Conjurer extends React.Component {
     };
   }
 
+  // TODO: remove this if it is unused
   getCodeEditorStyle() {
     return {
       top: 100,
@@ -278,7 +266,7 @@ class Conjurer extends React.Component {
         1, // deleteCount
         parent
     );
-    
+
     this.setState({
       objects: newObjects
     }, function () {
@@ -335,7 +323,7 @@ class Conjurer extends React.Component {
     
     var minX =  Math.min(...this.state.newShapes.map(wrapper => wrapper.x));
     var minY =  Math.min(...this.state.newShapes.map(wrapper => wrapper.y));
-    var newObject = makeObj({
+    var newObject = new Obj({
       id: this.dragref,
       ref: this.dragref,
       x: minX,
@@ -347,30 +335,10 @@ class Conjurer extends React.Component {
         return shape;
       })
     });
-    /*}var newObject = {
-      id: this.dragref,
-      ref: this.dragref,
-      width: 180,
-      height: 180,
-      x: minX,
-      y: minY,
-      shapes: this.state.newShapes.slice().map(function (wrapper) {
-        var shape = wrapper.shapes[0];
-        shape.left = wrapper.x - minX;
-        shape.top = wrapper.y - minY;
-        return shape;
-      })
-    };*/
-    
-    // TODO: the two calls below are doing the same thing?
 
-    // Emit an event to parts bin to add a new item
+    // Emit an event to parts bin to add a new item, and clean the scene
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
-
-    this.setState({
-      parts: this.state.parts.concat(newObject),
-      newShapes: []
-    });
+    this.setState({newShapes: []});
   }
   
   addAnchor() {
@@ -405,11 +373,14 @@ class Conjurer extends React.Component {
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
+    // TODO: remove this if it is unused
     var textStyle = this.getTextStyle();
 
+    // TODO: kill PartsBin items as a prop
+    
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <PartsBin style={this.getPartsBinStyle()} items={this.state.parts} />
+        <PartsBin style={this.getPartsBinStyle()} items={[]} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
           {this.state.objects.map(this.renderObject)}
           {this.state.newShapes.map(this.renderObject)}
@@ -442,28 +413,12 @@ class Conjurer extends React.Component {
             />
           </Button>
         </Group>
-
-        
-
       </Surface>
     );
   }
 }
 
-// TODO: make an Obj class
-// TODO: abstract out to factory
-var makeObj = function ({id, ref, x, y, shapes}={}) {
-  return {
-    id: id,
-    ref: ref,
-    width: 180,
-    height: 180,
-    x: x,
-    y: y,
-    children: [],
-    shapes: shapes
-  };
-};
+// TODO: make all of these methods on Obj
 
 var copyShape = function(shape) {
   return {
@@ -477,7 +432,6 @@ var copyShape = function(shape) {
 };
 
 var copyObj = function(obj) {
-  debugger;
   return {
     id: obj.id,
     ref: obj.ref,
