@@ -9,6 +9,29 @@ class Obj {
         this.y = y;
         this.shapes = shapes;
     };
+    
+    copy () {
+        function copyShape (shape) {
+            return {
+                type: shape.type,
+                top: shape.top,
+                left: shape.left,
+                width: shape.width,
+                height: shape.height,
+                color: shape.color
+            };
+        }
+        return {
+            id: this.id,
+            ref: this.ref,
+            width: this.width,
+            height: this.height,
+            x: this.x,
+            y: this.y,
+            shapes: this.shapes.map(copyShape),
+            children: this.children.map(this.copy)
+        };
+    };
 }
 
 export default Obj;

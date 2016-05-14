@@ -197,7 +197,6 @@ class Conjurer extends React.Component {
 
   // TODO: check for collisions on both this.state.objects and their children, recursively, to allow for grandchildren
   handleCollision(obj) {
-    // get obj's bounds
     var objBounds =  {
       left : obj.x,
       top : obj.y,
@@ -248,8 +247,7 @@ class Conjurer extends React.Component {
   }
   
   mount(child, parent, origin) {
-    //parent.children = parent.children || [];
-    child = copyObj(child);
+    child = child.copy();
     child.key = getNewKey();
     
     // update the relative position of the child's shapes
@@ -419,30 +417,6 @@ class Conjurer extends React.Component {
 }
 
 // TODO: make all of these methods on Obj
-
-var copyShape = function(shape) {
-  return {
-    type: shape.type,
-    top: shape.top,
-    left: shape.left,
-    width: shape.width,
-    height: shape.height,
-    color: shape.color
-  };
-};
-
-var copyObj = function(obj) {
-  return {
-    id: obj.id,
-    ref: obj.ref,
-    width: obj.width,
-    height: obj.height,
-    x: obj.x,
-    y: obj.y,
-    shapes: obj.shapes.map(copyShape),
-    children: obj.children.map(copyObj)
-  };
-};
 
 var getRight = function (obj) {
   return obj.x

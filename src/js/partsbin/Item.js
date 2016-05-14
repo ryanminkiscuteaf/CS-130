@@ -42,10 +42,10 @@ class Item extends React.Component {
   renderGeneric() {
     return (
       <Generic
-        key={this.state.id}
-        xCoord={this.state.x}
-        yCoord={this.state.y}
-        shapes={this.state.shapes} />
+        key={this.state.obj.id}
+        xCoord={this.state.obj.x}
+        yCoord={this.state.obj.y}
+        shapes={this.state.obj.shapes} />
     );
   }
 
@@ -124,7 +124,7 @@ class Item extends React.Component {
   cloneItem(x, y) {
     console.log("Clone item with id: " + this.props.id);
     this.hasCloned = true;
-    var clone = this.state;
+    var clone = this.state.obj;
     clone.x = x;
     clone.y = y;
     ee.emitEvent(Event.PARTS_BIN_CLONE_ITEM_EVENT, [clone]);
@@ -185,7 +185,7 @@ class Item extends React.Component {
       height: side,
       shapes: resizedShapes
     });
-    this.setState(obj);
+    this.setState({obj: obj});
   }
 }
 
