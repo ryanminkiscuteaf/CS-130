@@ -224,19 +224,6 @@ class Conjurer extends React.Component {
 
   // TODO: check for collisions on both this.state.objects and their children, recursively, to allow for grandchildren
   handleCollision(obj) {
-    var objBounds =  {
-      left : obj.x,
-      top : obj.y,
-      right : getRight(obj),
-      bottom : getBottom(obj)
-    };
-
-    function inBounds(point, bounds) {
-      return ((point.x > bounds.left)
-          && (point.x < bounds.right)
-          && (point.y > bounds.top)
-          && (point.y < bounds.bottom));
-    }
     
     var newOrigin = null;
     
@@ -251,7 +238,7 @@ class Conjurer extends React.Component {
       // check to see if any of candidate's anchors are in obj's bounding rectangle
       // side note : apparently this is how you do a for ... in in javascript
       for (let coordinate of coordinates) {
-        if (inBounds(coordinate, objBounds)) {
+        if (obj.inBounds(coordinate)) {
           newOrigin = {x: coordinate.x - candidate.x, y: coordinate.y - candidate.y};
           return true;
         }
@@ -371,11 +358,9 @@ class Conjurer extends React.Component {
     this.y_orig = 200;
 
     // TODO: this object definition is really similar to handleMouseDown's defaultShape, so the two should be unified
-    var anchor = {
+    var anchor = new Obj({
       id: this.dragref,
       ref: this.dragref,
-      width: 180,
-      height: 180,
       x: this.x_orig,
       y: this.y_orig,
       shapes: [{
@@ -386,7 +371,7 @@ class Conjurer extends React.Component {
         height: 50,
         color: ANCHOR_COLOR
       }]
-    };
+    });
 
     this.setState({
       newShapes: this.state.newShapes.concat(anchor)
@@ -443,18 +428,6 @@ class Conjurer extends React.Component {
     );
   }
 }
-
-// TODO: make all of these methods on Obj
-
-var getRight = function (obj) {
-  return obj.x
-      + Math.max(...obj.shapes.map(shape => shape.left + shape.width));
-};
-
-var getBottom = function (obj) {
-  return obj.y
-      + Math.max(...obj.shapes.map(shape => shape.top + shape.height));
-};
 
 var OBJ_KEY = 0;
 var getNewKey = function () {return ++OBJ_KEY;};
