@@ -11,7 +11,7 @@ import Generic from './Generic';
 import PartsBin from './PartsBin';
 
 import Button from './Button';
-//import CodeEditor from './CodeEditor';
+import CodeEditor from './CodeEditor';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
@@ -55,6 +55,32 @@ class Conjurer extends React.Component {
   }
 
   handleMouseDown(e) {
+    // IMPORTANT: detect if CodeEditor is clicked or
+    // anything outside the CodeEditor is clicked
+    var codeEditorStyle = this.getCodeEditorStyle();
+
+    var ceX = parseInt(codeEditorStyle.left);
+    var ceY = parseInt(codeEditorStyle.top);
+    var ceX2 = ceX + parseInt(codeEditorStyle.width);
+    var ceY2 = ceY + parseInt(codeEditorStyle.height);
+
+    var isWithinCodeEditorXBoundaries = (e.clientX >= ceX) && (e.clientX <= ceX2);
+    var isWithinCodeEditorYBoundaries = (e.clientY >= ceY) && (e.clientY <= ceY2);
+
+    if (isWithinCodeEditorXBoundaries && isWithinCodeEditorYBoundaries) {
+      // CodeEditor is clicked
+      ee.emitEvent(Event.CODE_EDITOR_ON_CLICK);
+
+      // IMPORTANT: Return right away so we don't create objects where the code editor is
+      // because if the objects are created behind the code editor
+      // it will still overwrite code editor's onClick handler
+      return;
+
+    } else {
+      // CodeEditor is not clicked
+      ee.emitEvent(Event.CODE_EDITOR_OFF_CLICK);
+    }
+
     this.isDrawing = true;
     this.x_orig = e.clientX;
     this.y_orig = e.clientY;
@@ -138,11 +164,12 @@ class Conjurer extends React.Component {
   }
 
   getCodeEditorStyle() {
+    var w = 400;
     return {
-      top: 100,
-      left: 300,
-      width: 400,
-      height: 300,
+      top: 0,
+      left: window.innerWidth - w - 15,
+      width: w,
+      height: 400,
       backgroundColor: "#000000",
       textColor: "#ffffff"
     };
@@ -259,7 +286,7 @@ class Conjurer extends React.Component {
 
     this.dragref++;
   }
-//<CodeEditor style={this.getCodeEditorStyle()} />
+
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
@@ -304,7 +331,7 @@ class Conjurer extends React.Component {
           </Button>
         </Group>
 
-        
+        <CodeEditor style={this.getCodeEditorStyle()} />
 
       </Surface>
     );
