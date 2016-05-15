@@ -24,7 +24,7 @@ var getSampleGeneric = function() {
 var getPartsBinItems = function() {
 	var items = [];
 
-	for (let i = 0; i < 20; i++) {
+	for (let i = 0; i < 1; i++) {
 		items = items.concat(getSampleGeneric());
 	}
 
