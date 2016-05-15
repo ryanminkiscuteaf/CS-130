@@ -12,21 +12,36 @@ import PartsBin from './PartsBin';
 
 import Button from './Button';
 import CodeEditor from './CodeEditor';
+import Obj from './Obj';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
+// TODO: remove this if it is unused
 let Image = ReactCanvas.Image;
+// TODO: remove this if it is unused
 let Text = ReactCanvas.Text;
 
 let Event = require('./event/EventNames');
 let ee = require('./event/EventEmitter');
 
+// TODO: remove this if it is unused
 let sampleItems = require('./SampleItems');
+
+let ANCHOR_COLOR = "#903fd1";
+let DEFAULT_COLOR = "#0000ff";
+
+let CIRCLE_SHAPE = {
+  type: 'circle',
+  top: 0,
+  left: 0,
+  width: 50,
+  height: 50,
+  color: DEFAULT_COLOR
+};
 
 class Conjurer extends React.Component {
   constructor(props) {
     super(props);
-    console.log("HEY yo");
     this.state = {};
 
     // Listener for event from the Parts Bin
@@ -35,11 +50,15 @@ class Conjurer extends React.Component {
     // coordinate data for drawing shapes
     this.x_orig = 0;
     this.y_orig = 0;
+    
+    // TODO: these are unused, so delete them
     this.x_curr = 0;
     this.y_curr = 0;
 
     this.updatePosition = this.updatePosition.bind(this);
-    this.renderChild = this.renderChild.bind(this);
+    this.renderObject = this.renderObject.bind(this);
+    this.handleCollision = this.handleCollision.bind(this);
+    this.mount = this.mount.bind(this);
 
     this.dragref = 0;
   }
@@ -85,26 +104,19 @@ class Conjurer extends React.Component {
     this.x_orig = e.clientX;
     this.y_orig = e.clientY;
 
-    var defaultShape = {
+    // TODO: abstract out to factory
+    var obj = new Obj({
       id: this.dragref,
       ref: this.dragref,
-      width: 180,
-      height: 180,
       x: this.x_orig,
       y: this.y_orig,
-      shapes: [{
-        type: 'circle',
-        top: 0,
-        left: 0,
-        width: 50,
-        height: 50
-      }]
-    };
+      shapes: [CIRCLE_SHAPE]
+    }); 
     
     this.dragref++;
     
     this.setState({
-      newShapes: this.state.newShapes.concat(defaultShape)
+      newShapes: this.state.newShapes.concat(obj)
     });
   }
 
@@ -120,6 +132,7 @@ class Conjurer extends React.Component {
     };
   }
 
+  // TODO: remove this if it is unused
   getSampleGeneric() {
     var id = Math.floor((Math.random() * 1000) + 1);
     return {
@@ -163,6 +176,7 @@ class Conjurer extends React.Component {
     };
   }
 
+  // TODO: remove this if it is unused
   getCodeEditorStyle() {
     var w = 400;
     return {
@@ -177,8 +191,6 @@ class Conjurer extends React.Component {
 
   // Clone parts bin item given an emitted event
   cloneItem(item) {
-    console.log("Clone item conjurer - id: " + item.id);
-
     item.id = this.dragref;
     item.ref = this.dragref;
     item.x = window.innerWidth/2;
@@ -204,24 +216,125 @@ class Conjurer extends React.Component {
   shapes={obj.shapes} />
   */
 
-  updatePosition(x, y, shape) {
-    shape.x = x;
-    shape.y = y;
+  updatePosition(x, y, obj) {
+    obj.x = x;
+    obj.y = y;
+    this.handleCollision(obj);
   }
 
-  renderChild(child) {
+  // TODO: check for collisions on both this.state.objects and their children, recursively, to allow for grandchildren
+  handleCollision(obj) {
+    var objBounds =  {
+      left : obj.x,
+      top : obj.y,
+      right : getRight(obj),
+      bottom : getBottom(obj)
+    };
+
+    function inBounds(point, bounds) {
+      return ((point.x > bounds.left)
+          && (point.x < bounds.right)
+          && (point.y > bounds.top)
+          && (point.y < bounds.bottom));
+    }
+    
+    var newOrigin = null;
+    
+    function didCollide(candidate) {
+      // get shapes that are anchors
+      // TODO: cannot read property 'shapes' of undefined
+      var anchors = candidate.shapes.filter(shape => shape.color === ANCHOR_COLOR);
+
+      // get absolute coordinates for anchors
+      var coordinates = anchors.map(anchor => ({x: anchor.left + candidate.x, y: anchor.top + candidate.y}));
+
+      // check to see if any of candidate's anchors are in obj's bounding rectangle
+      // side note : apparently this is how you do a for ... in in javascript
+      for (let coordinate of coordinates) {
+        if (inBounds(coordinate, objBounds)) {
+          newOrigin = {x: coordinate.x - candidate.x, y: coordinate.y - candidate.y};
+          return true;
+        }
+      }
+      return false;
+    }
+
+    var getCollision = function (candidates) {
+      if (candidates.length === 0) return null;
+      var collision = candidates.find(didCollide);
+      return collision
+          ? collision
+          : getCollision([].concat(...candidates.map(c => c.children)));
+    };
+    
+    var collision = getCollision(this.state.objects.filter(other => obj.id !== other.id));
+    if (collision) {
+      this.mount(obj, collision, newOrigin);
+    }
+  }
+  
+  mount(child, parent, origin) {
+    child = child.copy();
+    child.key = getNewKey();
+    
+    // update the relative position of the child's shapes
+    child.shapes = child.shapes.map(function(shape) {
+      shape.left += origin.x;
+      shape.top += origin.y;
+      return shape;
+    });
+    parent.children.push(child);
+    
+    var newObjects = this.state.objects.slice();
+    newObjects.splice(
+        newObjects.findIndex(obj => obj.id === parent.id),
+        1, // deleteCount
+        parent
+    );
+
+    this.setState({
+      objects: newObjects
+    }, function () {
+      var killedChild = this.state.objects.slice();
+      killedChild.splice(
+          killedChild.findIndex(obj => obj.id === child.id),
+          1 // deleteCount
+      );
+      this.setState({
+        objects: killedChild
+      });
+    });
+  }
+
+  renderObject(obj) {
     var onChange = function (x, y) {
-      this.updatePosition(x, y, child);
+      this.updatePosition(x, y, obj);
     }.bind(this);
-    return (
-        <Draggable xCoord={child.x} yCoord={child.y} onChange={onChange}>
+    
+    function renderChild(child) {
+      return (
           <Generic
               key={child.id}
               width={child.width}
               height={child.height}
               shapes={child.shapes}
               constrain={true}
+          />
+      )
+    }
+
+    var children = (obj.children) ? obj.children.map(renderChild) : <Group/>;
+    
+    return (
+        <Draggable xCoord={obj.x} yCoord={obj.y} onChange={onChange}>
+          <Generic
+              key={obj.id}
+              width={obj.width}
+              height={obj.height}
+              shapes={obj.shapes}
+              constrain={true}
               />
+          {children}
         </Draggable>
     );
   }
@@ -229,17 +342,15 @@ class Conjurer extends React.Component {
   saveObject() {
     
     if (this.state.newShapes.length === 0) {
-      console.log("no new shapes to save");
+      console.error("no new shapes to save");
       return;
     }
     
     var minX =  Math.min(...this.state.newShapes.map(wrapper => wrapper.x));
     var minY =  Math.min(...this.state.newShapes.map(wrapper => wrapper.y));
-    var newObject = {
+    var newObject = new Obj({
       id: this.dragref,
       ref: this.dragref,
-      width: 180,
-      height: 180,
       x: minX,
       y: minY,
       shapes: this.state.newShapes.slice().map(function (wrapper) {
@@ -248,21 +359,18 @@ class Conjurer extends React.Component {
         shape.top = wrapper.y - minY;
         return shape;
       })
-    };
-
-    // Emit an event to parts bin to add a new item
-    ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
-
-    this.setState({
-      parts: this.state.parts.concat(newObject),
-      newShapes: []
     });
+
+    // Emit an event to parts bin to add a new item, and clean the scene
+    ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
+    this.setState({newShapes: []});
   }
   
   addAnchor() {
     this.x_orig = 300;
     this.y_orig = 200;
 
+    // TODO: this object definition is really similar to handleMouseDown's defaultShape, so the two should be unified
     var anchor = {
       id: this.dragref,
       ref: this.dragref,
@@ -276,7 +384,7 @@ class Conjurer extends React.Component {
         left: 0,
         width: 50,
         height: 50,
-        color: "#903fd1"
+        color: ANCHOR_COLOR
       }]
     };
 
@@ -290,17 +398,17 @@ class Conjurer extends React.Component {
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
+    // TODO: remove this if it is unused
     var textStyle = this.getTextStyle();
 
+    // TODO: kill PartsBin items as a prop
+    
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <PartsBin style={this.getPartsBinStyle()} items={this.state.parts} />
+        <PartsBin style={this.getPartsBinStyle()} items={[]} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
-          <Text style={textStyle}>
-            Here is some text.
-          </Text>
-          {this.state.objects.map(this.renderChild)}
-          {this.state.newShapes.map(this.renderChild)}
+          {this.state.objects.map(this.renderObject)}
+          {this.state.newShapes.map(this.renderObject)}
           <Button xCoord={260} yCoord={10} onClick={this.saveObject.bind(this)}>
             <Generic
                 key={12321}
@@ -330,13 +438,26 @@ class Conjurer extends React.Component {
             />
           </Button>
         </Group>
-
         <CodeEditor style={this.getCodeEditorStyle()} />
-
       </Surface>
     );
   }
 }
+
+// TODO: make all of these methods on Obj
+
+var getRight = function (obj) {
+  return obj.x
+      + Math.max(...obj.shapes.map(shape => shape.left + shape.width));
+};
+
+var getBottom = function (obj) {
+  return obj.y
+      + Math.max(...obj.shapes.map(shape => shape.top + shape.height));
+};
+
+var OBJ_KEY = 0;
+var getNewKey = function () {return ++OBJ_KEY;};
 
 ReactDOM.render(
   <Conjurer />,

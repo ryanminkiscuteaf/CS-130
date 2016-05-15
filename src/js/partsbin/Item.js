@@ -5,6 +5,7 @@ import ReactCanvas from 'react-canvas';
 
 //import Draggable from '../Draggable';
 import Generic from '../Generic';
+import Obj from '../Obj';
 
 var Group = ReactCanvas.Group;
 var Event = require('../event/EventNames');
@@ -34,19 +35,21 @@ class Item extends React.Component {
     this.calculateGenericAttributes();
   }
 
+  // TODO: remove this if it is unused
   //width={this.state.width}
   //height={this.state.height}
 
   renderGeneric() {
     return (
       <Generic
-        key={this.state.id}
-        xCoord={this.state.x}
-        yCoord={this.state.y}
-        shapes={this.state.shapes} />
+        key={this.state.obj.id}
+        xCoord={this.state.obj.x}
+        yCoord={this.state.obj.y}
+        shapes={this.state.obj.shapes} />
     );
   }
 
+  // TODO: remove this if it is unused
   /*
   onMouseDown={this.handleMouseDown}
   onMouseMove={this.handleMouseMove}
@@ -77,6 +80,7 @@ class Item extends React.Component {
    * Mouse Events
    */
 
+  // TODO: remove if this never gets called
   handleMouseDown(e) {
     console.log("Mouse down123");
 
@@ -103,6 +107,7 @@ class Item extends React.Component {
     }
   }
 
+  // TODO: remove if this never gets called
   handleMouseUp(e) {
     console.log("Mouse up123");
     this.isLifted = false;
@@ -119,7 +124,7 @@ class Item extends React.Component {
   cloneItem(x, y) {
     console.log("Clone item with id: " + this.props.id);
     this.hasCloned = true;
-    var clone = this.state;
+    var clone = this.state.obj;
     clone.x = x;
     clone.y = y;
     ee.emitEvent(Event.PARTS_BIN_CLONE_ITEM_EVENT, [clone]);
@@ -150,9 +155,6 @@ class Item extends React.Component {
     var defWidth = Math.max(...this.props.shapes.map(child => child.left + child.width));
     var defHeight = Math.max(...this.props.shapes.map(child => child.top + child.height));
 
-    //console.log("w: " + defWidth);
-    //console.log("h: " + defHeight);
-
     var maxSide = Math.max(defWidth, defHeight);
     var newTop = top;
     var newLeft = left;
@@ -169,17 +171,13 @@ class Item extends React.Component {
     });
 
     if (defWidth >= defHeight) {
-
       newTop = top + (((defWidth - defHeight) / 2) * factor);
-      
     } else {
-
       newLeft = left + (((defHeight - defWidth) / 2) * factor);
-
     }
 
     // Save states
-    this.setState({
+    var obj = new Obj({
       id: this.props.id,
       x: newLeft,
       y: newTop,
@@ -187,6 +185,7 @@ class Item extends React.Component {
       height: side,
       shapes: resizedShapes
     });
+    this.setState({obj: obj});
   }
 }
 
