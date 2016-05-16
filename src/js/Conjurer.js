@@ -16,16 +16,9 @@ import Obj from './Obj';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
-// TODO: remove this if it is unused
-let Image = ReactCanvas.Image;
-// TODO: remove this if it is unused
-let Text = ReactCanvas.Text;
 
 let Event = require('./event/EventNames');
 let ee = require('./event/EventEmitter');
-
-// TODO: remove this if it is unused
-let sampleItems = require('./SampleItems');
 
 let ANCHOR_COLOR = "#903fd1";
 let DEFAULT_COLOR = "#0000ff";
@@ -51,10 +44,6 @@ class Conjurer extends React.Component {
     this.x_orig = 0;
     this.y_orig = 0;
     
-    // TODO: these are unused, so delete them
-    this.x_curr = 0;
-    this.y_curr = 0;
-
     this.updatePosition = this.updatePosition.bind(this);
     this.renderObject = this.renderObject.bind(this);
     this.handleCollision = this.handleCollision.bind(this);
@@ -132,41 +121,6 @@ class Conjurer extends React.Component {
     };
   }
 
-  // TODO: remove this if it is unused
-  getSampleGeneric() {
-    var id = Math.floor((Math.random() * 1000) + 1);
-    return {
-      id: id,
-      ref: id,
-      shapes: [{
-            type: 'circle',
-            top: 0, //10
-            left: 0, //10
-            width: 50,
-            height: 50
-          },
-          {
-            type: 'circle',
-            top: 150,
-            left: 50,
-            width: 60,
-            height: 60
-          }
-          ]
-    };
-  }
-
-  getTextStyle() {
-    return {
-      top: 0,
-      left: 0,
-      width: window.innerWidth,
-      height: 50,
-      lineHeight: 20,
-      fontSize: 25
-    };
-  }
-
   getWrapperStyle() {
     return {
       top: 0,
@@ -176,7 +130,6 @@ class Conjurer extends React.Component {
     };
   }
 
-  // TODO: remove this if it is unused
   getCodeEditorStyle() {
     var w = 400;
     return {
@@ -202,19 +155,6 @@ class Conjurer extends React.Component {
 
     this.dragref++;
   }
-
-  /*
-  REPLACE DRAGGABLE OBJECT IN RENDER WITH THIS GENERIC
-  BELOW IF YOU DONT WANT IT TO BE DRAGGABLE
-
-<Generic
-  xCoord={obj.x}
-  yCoord={obj.y}
-  key={obj.id}
-  width={obj.width}
-  height={obj.height}
-  shapes={obj.shapes} />
-  */
 
   updatePosition(x, y, obj) {
     obj.x = x;
@@ -398,14 +338,10 @@ class Conjurer extends React.Component {
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
-    // TODO: remove this if it is unused
-    var textStyle = this.getTextStyle();
-
-    // TODO: kill PartsBin items as a prop
     
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <PartsBin style={this.getPartsBinStyle()} items={[]} />
+        <PartsBin style={this.getPartsBinStyle()} />
         <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
           {this.state.objects.map(this.renderObject)}
           {this.state.newShapes.map(this.renderObject)}
