@@ -13,6 +13,7 @@ import PartsBin from './PartsBin';
 import Button from './Button';
 import CodeEditor from './CodeEditor';
 import Obj from './Obj';
+import Anchor from './Anchor';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
@@ -27,9 +28,9 @@ let ee = require('./event/EventEmitter');
 // TODO: remove this if it is unused
 let sampleItems = require('./SampleItems');
 
-let ANCHOR_COLOR = "#903fd1";
 let DEFAULT_COLOR = "#0000ff";
 
+// TODO: move this to Obj @lowellbander
 let CIRCLE_SHAPE = {
   type: 'circle',
   top: 0,
@@ -104,7 +105,6 @@ class Conjurer extends React.Component {
     this.x_orig = e.clientX;
     this.y_orig = e.clientY;
 
-    // TODO: abstract out to factory
     var obj = new Obj({
       id: this.dragref,
       ref: this.dragref,
@@ -224,39 +224,13 @@ class Conjurer extends React.Component {
 
   // TODO: check for collisions on both this.state.objects and their children, recursively, to allow for grandchildren
   handleCollision(obj) {
+    var collidee = null,
+        origin = null,
+        candidates = this.state.objects.filter(other => obj.id !== other.id);
     
-    var newOrigin = null;
-    
-    function didCollide(candidate) {
-      // get shapes that are anchors
-      // TODO: cannot read property 'shapes' of undefined
-      var anchors = candidate.shapes.filter(shape => shape.color === ANCHOR_COLOR);
-
-      // get absolute coordinates for anchors
-      var coordinates = anchors.map(anchor => ({x: anchor.left + candidate.x, y: anchor.top + candidate.y}));
-
-      // check to see if any of candidate's anchors are in obj's bounding rectangle
-      // side note : apparently this is how you do a for ... in in javascript
-      for (let coordinate of coordinates) {
-        if (obj.inBounds(coordinate)) {
-          newOrigin = {x: coordinate.x - candidate.x, y: coordinate.y - candidate.y};
-          return true;
-        }
-      }
-      return false;
-    }
-
-    var getCollision = function (candidates) {
-      if (candidates.length === 0) return null;
-      var collision = candidates.find(didCollide);
-      return collision
-          ? collision
-          : getCollision([].concat(...candidates.map(c => c.children)));
-    };
-    
-    var collision = getCollision(this.state.objects.filter(other => obj.id !== other.id));
-    if (collision) {
-      this.mount(obj, collision, newOrigin);
+    ({collidee, origin} = obj.getCollision(candidates));
+    if (collidee) {
+      this.mount(obj, collidee, origin);
     }
   }
   
@@ -358,19 +332,11 @@ class Conjurer extends React.Component {
     this.y_orig = 200;
 
     // TODO: this object definition is really similar to handleMouseDown's defaultShape, so the two should be unified
-    var anchor = new Obj({
+    var anchor = new Anchor({
       id: this.dragref,
       ref: this.dragref,
       x: this.x_orig,
-      y: this.y_orig,
-      shapes: [{
-        type: 'circle',
-        top: 0,
-        left: 0,
-        width: 50,
-        height: 50,
-        color: ANCHOR_COLOR
-      }]
+      y: this.y_orig
     });
 
     this.setState({
