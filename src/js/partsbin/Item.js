@@ -3,7 +3,6 @@
 import React from 'react';
 import ReactCanvas from 'react-canvas';
 
-//import Draggable from '../Draggable';
 import Generic from '../Generic';
 import Obj from '../Obj';
 
@@ -15,15 +14,7 @@ class Item extends React.Component {
   constructor() {
     super();
 
-    this.mouseX = 0;
-    this.mouseY = 0;
-    this.isLifted = false;
-    this.hasCloned = false;
-
     // Initialize mouse handlers
-    this.handleMouseDown = this.handleMouseDown.bind(this);
-    this.handleMouseMove = this.handleMouseMove.bind(this);
-    this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
 
@@ -35,10 +26,6 @@ class Item extends React.Component {
     this.calculateGenericAttributes();
   }
 
-  // TODO: remove this if it is unused
-  //width={this.state.width}
-  //height={this.state.height}
-
   renderGeneric() {
     return (
       <Generic
@@ -49,14 +36,7 @@ class Item extends React.Component {
     );
   }
 
-  // TODO: remove this if it is unused
-  /*
-  onMouseDown={this.handleMouseDown}
-  onMouseMove={this.handleMouseMove}
-  onMouseUp={this.handleMouseUp}
-  */
-
-	render() {
+  render() {
     return (
       <Group 
         style={this.getStyle()}
@@ -80,39 +60,6 @@ class Item extends React.Component {
    * Mouse Events
    */
 
-  // TODO: remove if this never gets called
-  handleMouseDown(e) {
-    console.log("Mouse down123");
-
-    this.isLifted = true;
-    this.mouseX = e.clientX;
-    this.mouseY = e.clientY;
-  }
-
-  handleMouseMove(e) {
-    if (this.isLifted) {
-      console.log("Mouse move on item with id: " + this.props.id);
-
-      var deltaX = Math.abs(this.mouseX - e.clientX);
-      var deltaY = Math.abs(this.mouseY - e.clientY);
-
-      console.log(e.clientX);
-      console.log(e.clientY);
-
-      // Clone item if mouse moves for a certain distance
-      if (!this.hasCloned && (deltaX > 10 || deltaY > 10)) {
-        this.cloneItem(e.clientX, e.clientY);
-      }
-
-    }
-  }
-
-  // TODO: remove if this never gets called
-  handleMouseUp(e) {
-    console.log("Mouse up123");
-    this.isLifted = false;
-  }
-
   handleClick(e) {
     this.cloneItem(e.clientX, e.clientY);
   }
@@ -123,7 +70,6 @@ class Item extends React.Component {
 
   cloneItem(x, y) {
     console.log("Clone item with id: " + this.props.id);
-    this.hasCloned = true;
     var clone = this.state.obj;
     clone.x = x;
     clone.y = y;
