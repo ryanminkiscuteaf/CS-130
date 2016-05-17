@@ -2,10 +2,10 @@
 let ANCHOR_COLOR = "#903fd1";
 
 class Obj {
-    constructor ({id, ref, x, y, shapes, width, height}={}) {
+    constructor ({id, ref, x, y, shapes, width, height, children}={}) {
         this.width = width || 180;
         this.height = height || 180;
-        this.children = [];
+        this.children = children || [];
         this.id = id;
         this.ref = ref;
         this.x = x;
@@ -26,7 +26,7 @@ class Obj {
                 color: shape.color
             };
         }
-        return {
+        return new Obj({
             id: this.id,
             ref: this.ref,
             width: this.width,
@@ -35,7 +35,7 @@ class Obj {
             y: this.y,
             shapes: this.shapes.map(copyShape),
             children: this.children.map(this.copy)
-        };
+        });
     }
     
     right () {
@@ -94,6 +94,14 @@ class Obj {
             ? {collidee: collision, origin: newOrigin}
             : this.getCollision([].concat(...candidates.map(c => c.children)));
     }
+
+    getFamily() {
+        return (this.children.length === 0)
+            ? [this]
+            : [this].concat(...this.children.map(c => c.getFamily()));
+    }
+    
+    // TODO: refactor [].concat(...arrs) pattern to a merge() function
 }
 
 export default Obj;

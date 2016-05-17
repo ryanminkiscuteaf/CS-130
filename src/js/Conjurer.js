@@ -198,7 +198,7 @@ class Conjurer extends React.Component {
       this.updatePosition(x, y, obj);
     }.bind(this);
     
-    function renderChild(child) {
+    function renderSimpleObject(child) {
       return (
           <Generic
               key={child.id}
@@ -209,9 +209,8 @@ class Conjurer extends React.Component {
           />
       )
     }
-
-    // TODO: flatten children to render all descendents
-    var children = (obj.children) ? obj.children.map(renderChild) : <Group/>;
+    
+    var family = obj.getFamily().map(renderSimpleObject);
     
     return (
         <Draggable xCoord={obj.x} yCoord={obj.y} onChange={onChange}>
@@ -222,7 +221,7 @@ class Conjurer extends React.Component {
               shapes={obj.shapes}
               constrain={true}
               />
-          {children}
+          {family}
         </Draggable>
     );
   }
