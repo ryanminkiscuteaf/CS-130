@@ -187,25 +187,9 @@ class Conjurer extends React.Component {
       return shape;
     });
     parent.children.push(child);
-    
-    var newObjects = this.state.objects.slice();
-    newObjects.splice(
-        newObjects.findIndex(obj => obj.id === parent.id),
-        1, // deleteCount
-        parent
-    );
 
     this.setState({
-      objects: newObjects
-    }, function () {
-      var killedChild = this.state.objects.slice();
-      killedChild.splice(
-          killedChild.findIndex(obj => obj.id === child.id),
-          1 // deleteCount
-      );
-      this.setState({
-        objects: killedChild
-      });
+      objects: this.state.objects.filter(obj => obj.id !== child.id)
     });
   }
 
@@ -226,6 +210,7 @@ class Conjurer extends React.Component {
       )
     }
 
+    // TODO: flatten children to render all descendents
     var children = (obj.children) ? obj.children.map(renderChild) : <Group/>;
     
     return (
