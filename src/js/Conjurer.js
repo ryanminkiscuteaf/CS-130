@@ -15,6 +15,10 @@ import CodeEditor from './CodeEditor';
 import Obj from './Obj';
 import Anchor from './Anchor';
 
+//import NumberPrimitive from './shapes/NumberPrimitive';
+
+import TextBox from './TextBox';
+
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
 
@@ -65,6 +69,13 @@ class Conjurer extends React.Component {
     };
   }
 
+  handleClick(e) {
+    // Let each "Number Primitive component" figures out if it is clicked or not
+    // This allows a previously clicked "number primitive component" to check
+    // if it is not clicked anymore so it removes its key event listeners
+    ee.emitEvent(Event.CONJURER_CLICK, [{X: e.clientX, Y: e.clientY}]);
+  }
+
   handleMouseDown(e) {
     // IMPORTANT: detect if CodeEditor is clicked or
     // anything outside the CodeEditor is clicked
@@ -91,6 +102,9 @@ class Conjurer extends React.Component {
       // CodeEditor is not clicked
       ee.emitEvent(Event.CODE_EDITOR_OFF_CLICK);
     }
+
+    // TODO: TEST
+    //return;
 
     this.isDrawing = true;
     this.x_orig = e.clientX;
@@ -287,6 +301,22 @@ class Conjurer extends React.Component {
 
     this.dragref++;
   }
+  
+  /*
+  <Draggable xCoord={300} yCoord={300}>
+          <Generic 
+            key={getNewKey()}
+            shapes={[
+              {
+                type: 'number',
+                top: 0,
+                left: 0,
+                width: 200,
+                height: 200
+              }
+            ]} />
+        </Draggable>
+  */
 
   render() {
     var surfaceWidth = window.innerWidth;
@@ -295,7 +325,7 @@ class Conjurer extends React.Component {
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
         <PartsBin style={this.getPartsBinStyle()} />
-        <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)}>
+        <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)} onClick={this.handleClick.bind(this)}>
           {this.state.objects.map(this.renderObject)}
           {this.state.newShapes.map(this.renderObject)}
           <Button xCoord={260} yCoord={10} onClick={this.saveObject.bind(this)}>
@@ -327,6 +357,10 @@ class Conjurer extends React.Component {
             />
           </Button>
         </Group>
+        <TextBox style={{
+          top: 300,
+          left: 300
+        }} />
         <CodeEditor style={this.getCodeEditorStyle()} />
       </Surface>
     );
