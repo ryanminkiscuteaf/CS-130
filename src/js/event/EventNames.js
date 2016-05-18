@@ -4,5 +4,6 @@ module.exports = {
 	PARTS_BIN_REPLACE_ITEM_EVENT: "parts bin replace item event",
 	PARTS_BIN_CLONE_ITEM_EVENT: "parts bin clone item event",
 	CODE_EDITOR_ON_CLICK: "code editor on click",
-	CODE_EDITOR_OFF_CLICK: "code editor off click"
+	CODE_EDITOR_OFF_CLICK: "code editor off click",
+	CONJURER_CLICK: "conjurer click"
 };
