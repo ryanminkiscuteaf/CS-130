@@ -201,25 +201,9 @@ class Conjurer extends React.Component {
       return shape;
     });
     parent.children.push(child);
-    
-    var newObjects = this.state.objects.slice();
-    newObjects.splice(
-        newObjects.findIndex(obj => obj.id === parent.id),
-        1, // deleteCount
-        parent
-    );
 
     this.setState({
-      objects: newObjects
-    }, function () {
-      var killedChild = this.state.objects.slice();
-      killedChild.splice(
-          killedChild.findIndex(obj => obj.id === child.id),
-          1 // deleteCount
-      );
-      this.setState({
-        objects: killedChild
-      });
+      objects: this.state.objects.filter(obj => obj.id !== child.id)
     });
   }
 
@@ -228,7 +212,7 @@ class Conjurer extends React.Component {
       this.updatePosition(x, y, obj);
     }.bind(this);
     
-    function renderChild(child) {
+    function renderSimpleObject(child) {
       return (
           <Generic
               key={child.id}
@@ -239,8 +223,8 @@ class Conjurer extends React.Component {
           />
       )
     }
-
-    var children = (obj.children) ? obj.children.map(renderChild) : <Group/>;
+    
+    var family = obj.getFamily().map(renderSimpleObject);
     
     return (
         <Draggable xCoord={obj.x} yCoord={obj.y} onChange={onChange}>
@@ -251,7 +235,7 @@ class Conjurer extends React.Component {
               shapes={obj.shapes}
               constrain={true}
               />
-          {children}
+          {family}
         </Draggable>
     );
   }
