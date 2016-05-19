@@ -12,8 +12,10 @@ import PartsBin from './PartsBin';
 
 import Button from './Button';
 import CodeEditor from './CodeEditor';
+
 import Obj from './Obj';
 import Anchor from './Anchor';
+import Shape from './Shape';
 
 //import NumberPrimitive from './shapes/NumberPrimitive';
 
@@ -27,17 +29,6 @@ let ee = require('./event/EventEmitter');
 
 // TODO: remove this if it is unused
 let sampleItems = require('./SampleItems');
-let DEFAULT_COLOR = "#0000ff";
-
-// TODO: move this to Obj @lowellbander
-let CIRCLE_SHAPE = {
-  type: 'circle',
-  top: 0,
-  left: 0,
-  width: 50,
-  height: 50,
-  color: DEFAULT_COLOR
-};
 
 class Conjurer extends React.Component {
   constructor(props) {
@@ -115,7 +106,7 @@ class Conjurer extends React.Component {
       ref: this.dragref,
       x: this.x_orig,
       y: this.y_orig,
-      shapes: [CIRCLE_SHAPE]
+      shapes: [new Shape()]
     }); 
     
     this.dragref++;
@@ -255,7 +246,7 @@ class Conjurer extends React.Component {
       x: minX,
       y: minY,
       shapes: this.state.newShapes.slice().map(function (wrapper) {
-        var shape = wrapper.shapes[0];
+        var shape = wrapper.shapes[0].copy();
         shape.left = wrapper.x - minX;
         shape.top = wrapper.y - minY;
         return shape;
