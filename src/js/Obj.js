@@ -1,4 +1,7 @@
 // TODO: deprecate this by delegation on Anchor
+
+import Shape from './Shape';
+
 let ANCHOR_COLOR = "#903fd1";
 
 class Obj {
@@ -14,18 +17,8 @@ class Obj {
 
         this.getCollision = this.getCollision.bind(this);
     }
-    
+
     copy () {
-        function copyShape (shape) {
-            return {
-                type: shape.type,
-                top: shape.top,
-                left: shape.left,
-                width: shape.width,
-                height: shape.height,
-                color: shape.color
-            };
-        }
         return new Obj({
             id: this.id,
             ref: this.ref,
@@ -33,7 +26,7 @@ class Obj {
             height: this.height,
             x: this.x,
             y: this.y,
-            shapes: this.shapes.map(copyShape),
+            shapes: this.shapes.map(shape => shape.copy()),
             children: this.children.map(this.copy)
         });
     }
