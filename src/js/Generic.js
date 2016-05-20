@@ -4,6 +4,7 @@ import ReactCanvas from 'react-canvas';
 import DraggableComponent from './DraggableComponent';
 import Circle from './shapes/Circle';
 import Rectangle from './shapes/Rectangle';
+import NumberPrimitive from './shapes/NumberPrimitive';
 
 let Group = ReactCanvas.Group;
 
@@ -118,6 +119,45 @@ class Generic extends React.Component {
     };
   }
 
+  renderShape(pos_x, pos_y, shape) {
+    if (shape.type == "circle") {
+      return this.renderCircle(pos_x, pos_y, shape);
+    } else if (shape.type == "number") {
+      return this.renderNumberPrimitive(pos_x, pos_y, shape);
+    } else {
+      /* A shape is a circle by default */
+      return this.renderCircle(pos_x, pos_y, shape);
+    }
+  }
+
+  renderCircle(pos_x, pos_y, shape) {
+    return (
+      <Circle
+        key={shape.id}
+        style={{
+          top: pos_y + this.state.absolute_offset.y,
+          left: pos_x + this.state.absolute_offset.x,
+          width: shape.width * this.ratio,
+          height: shape.height * this.ratio,
+          borderWidth: 1,
+          backgroundColor: shape.color || "#003fd1"
+        }} />
+    );
+  }
+
+  renderNumberPrimitive(pos_x, pos_y, shape) {
+    return (
+      <NumberPrimitive 
+        key={shape.id}
+        style={{
+          top: pos_y + this.state.absolute_offset.y,
+          left: pos_x + this.state.absolute_offset.x, 
+          width: shape.width * this.ratio,
+          height: shape.height * this.ratio,
+        }} />
+    );
+  }
+
   render() {
     var objStyle = this.getStyle();
 
@@ -127,20 +167,8 @@ class Generic extends React.Component {
           this.state.shapes.map(function(shape) {
             let pos_x = (this.state.left + shape.left) * this.ratio;
             let pos_y = (this.state.top + shape.top) * this.ratio;
-
-            return (
-              <Circle
-                key={shape.id}
-                style={{
-                  top: pos_y + this.state.absolute_offset.y,
-                  left: pos_x + this.state.absolute_offset.x,
-                  width: shape.width * this.ratio,
-                  height: shape.height * this.ratio,
-                  borderWidth: 1,
-                  backgroundColor: shape.color || "#003fd1"
-                }}
-              />
-            );
+            // Render shape according to its type
+            return this.renderShape(pos_x, pos_y, shape);
           }.bind(this))
         }
       </Group>
