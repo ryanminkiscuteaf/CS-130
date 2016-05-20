@@ -69,7 +69,7 @@ class Conjurer extends React.Component {
     };
   }
 
-  handleClick(e) {
+  handleDoubleClick(e) {
     // Let each "Number Primitive component" figures out if it is clicked or not
     // This allows a previously clicked "number primitive component" to check
     // if it is not clicked anymore so it removes its key event listeners
@@ -123,6 +123,9 @@ class Conjurer extends React.Component {
     this.setState({
       newShapes: this.state.newShapes.concat(obj)
     });
+
+    console.log("States: ");
+    console.log(this.state.newShapes);
   }
 
   getPartsBinStyle() {
@@ -262,6 +265,8 @@ class Conjurer extends React.Component {
       })
     });
 
+    console.log(newObject);
+
     // Emit an event to parts bin to add a new item, and clean the scene
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
     this.setState({newShapes: []});
@@ -285,23 +290,32 @@ class Conjurer extends React.Component {
 
     this.dragref++;
   }
-  
-  /*
-  <Draggable xCoord={300} yCoord={300}>
-          <Generic 
-            key={getNewKey()}
-            shapes={[
-              {
-                type: 'number',
-                top: 0,
-                left: 0,
-                width: 200,
-                height: 200
-              }
-            ]} />
-        </Draggable>
-  */
 
+  addNumberPrimitive() {
+    console.log("Num primitive");
+
+    var newObject = {
+      x: 300,
+      y: 300,
+      key: getNewKey(),
+      shapes: [
+        {
+          type: 'number',
+          top: 0,
+          left: 0,
+          width: 50,
+          height: 50
+        }
+      ]
+    };
+/*
+    */
+
+    // Emit an event to parts bin to add a new item, and clean the scene
+    ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
+    this.setState({newShapes: []});
+  }
+  
   render() {
     var surfaceWidth = window.innerWidth;
     var surfaceHeight = window.innerHeight;
@@ -309,7 +323,7 @@ class Conjurer extends React.Component {
     return (
       <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
         <PartsBin style={this.getPartsBinStyle()} />
-        <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)} onClick={this.handleClick.bind(this)}>
+        <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)} onDoubleClick={this.handleDoubleClick.bind(this)}>
           {this.state.objects.map(this.renderObject)}
           {this.state.newShapes.map(this.renderObject)}
           <Button xCoord={260} yCoord={10} onClick={this.saveObject.bind(this)}>
@@ -340,11 +354,36 @@ class Conjurer extends React.Component {
           }]}
             />
           </Button>
+          <Button xCoord={500} yCoord={10} onClick={this.addNumberPrimitive.bind(this)}>
+            <Generic
+                key={12321}
+                width={100}
+                height={100}
+                shapes={[{
+            type: 'circle',
+            top: 10,
+            left: 10,
+            width: 30,
+            height: 30
+          }]}
+            />
+          </Button>
         </Group>
-        <TextBox style={{
-          top: 300,
-          left: 300
-        }} />
+
+        <Draggable xCoord={300} yCoord={300}>
+          <Generic 
+            key={getNewKey()}
+            shapes={[
+              {
+                type: 'number',
+                top: 0,
+                left: 0,
+                width: 100,
+                height: 100
+              }
+            ]} />
+        </Draggable>
+
         <CodeEditor style={this.getCodeEditorStyle()} />
       </Surface>
     );
