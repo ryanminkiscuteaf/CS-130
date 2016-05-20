@@ -17,18 +17,13 @@ import Obj from './Obj';
 import Anchor from './Anchor';
 import Shape from './Shape';
 
-//import NumberPrimitive from './shapes/NumberPrimitive';
-
-import TextBox from './TextBox';
+import NumberPrimitive from './shapes/NumberPrimitive';
 
 let Surface = ReactCanvas.Surface;
 let Group = ReactCanvas.Group;
 
 let Event = require('./event/EventNames');
 let ee = require('./event/EventEmitter');
-
-// TODO: remove this if it is unused
-let sampleItems = require('./SampleItems');
 
 class Conjurer extends React.Component {
   constructor(props) {
@@ -114,9 +109,6 @@ class Conjurer extends React.Component {
     this.setState({
       newShapes: this.state.newShapes.concat(obj)
     });
-
-    console.log("States: ");
-    console.log(this.state.newShapes);
   }
 
   getPartsBinStyle() {
@@ -256,8 +248,6 @@ class Conjurer extends React.Component {
       })
     });
 
-    console.log(newObject);
-
     // Emit an event to parts bin to add a new item, and clean the scene
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
     this.setState({newShapes: []});
@@ -283,24 +273,19 @@ class Conjurer extends React.Component {
   }
 
   addNumberPrimitive() {
-    console.log("Num primitive");
-
     var newObject = {
       x: 300,
       y: 300,
       key: getNewKey(),
-      shapes: [
-        {
-          type: 'number',
-          top: 0,
-          left: 0,
-          width: 50,
-          height: 50
-        }
-      ]
+      shapes: [new Shape({
+                type: 'number',
+                top: 0,
+                left: 0,
+                width: 80,
+                height: 80,
+                color: "#E21212"
+              })]
     };
-/*
-    */
 
     // Emit an event to parts bin to add a new item, and clean the scene
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
@@ -355,26 +340,12 @@ class Conjurer extends React.Component {
             top: 10,
             left: 10,
             width: 30,
-            height: 30
+            height: 30,
+            color: "red"
           }]}
             />
           </Button>
         </Group>
-
-        <Draggable xCoord={300} yCoord={300}>
-          <Generic 
-            key={getNewKey()}
-            shapes={[
-              {
-                type: 'number',
-                top: 0,
-                left: 0,
-                width: 100,
-                height: 100
-              }
-            ]} />
-        </Draggable>
-
         <CodeEditor style={this.getCodeEditorStyle()} />
       </Surface>
     );
