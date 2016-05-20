@@ -55,8 +55,6 @@ class CodeEditor extends React.Component {
 		this.style.charTotalMax = Math.floor(lineWidth / this.style.charWidth);
 		this.style.lineTotalMax = Math.floor((this.style.height - this.style.padding - this.style.divHeight) / this.style.lineHeight);
 
-		console.log(this.style.lineTotalMax);
-
 		this.state = {
 			texts: [[""]],
 			lineTotal: 1,
