@@ -70,6 +70,20 @@ class Obj {
             for (let coordinate of coordinates) {
                 if (this.inBounds(coordinate)) {
                     newOrigin = {x: coordinate.x - candidate.x, y: coordinate.y - candidate.y};
+                    
+                    // do some math to try to prevent siblings from occluding each other
+                    var xs = coordinates.map(c => c.x - candidate.x);
+                    var x_max = Math.max(...xs);
+                    var x_min = Math.min(...xs);
+                    var x_mid = (x_max - x_min)/2;
+                    var width = 180;
+                    var index = xs.findIndex(x => x === coordinate.x - candidate.x);
+                    var x = (index >= xs.length/2)
+                        ? x_mid + index * width * 0.25
+                        : x_mid - (index + 1) * width;
+                    
+                    newOrigin = {x: x, y: coordinate.y - candidate.y};
+                    
                     return true;
                 }
             }
