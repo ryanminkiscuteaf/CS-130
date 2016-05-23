@@ -5,7 +5,8 @@
 let DEFAULT_COLOR = "#0000ff";
 
 class Shape {
-    constructor ({type, top, left, width, height, color}={}) {
+    constructor ({id, type, top, left, width, height, color}={}) {
+        this.id = id;
         this.type = type || 'circle';
         this.top = top || 0;
         this.left = left || 0;
