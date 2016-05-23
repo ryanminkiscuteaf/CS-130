@@ -76,7 +76,7 @@ class Obj {
                     var x_max = Math.max(...xs);
                     var x_min = Math.min(...xs);
                     var x_mid = (x_max - x_min)/2;
-                    var width = 180;
+                    var width = x_max - x_min;
                     var index = xs.findIndex(x => x === coordinate.x - candidate.x);
                     var x = (index >= xs.length/2)
                         ? x_mid + index * width * 0.25
