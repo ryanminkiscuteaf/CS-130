@@ -149,6 +149,8 @@ class Generic extends React.Component {
     return (
       <NumberPrimitive 
         key={shape.id}
+        id={shape.id}
+        value={shape.value}
         style={{
           top: pos_y + this.state.absolute_offset.y,
           left: pos_x + this.state.absolute_offset.x, 
