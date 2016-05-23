@@ -16,6 +16,7 @@ import CodeEditor from './CodeEditor';
 import Obj from './Obj';
 import Anchor from './Anchor';
 import Shape from './Shape';
+import NumberShape from './NumberShape';
 
 import NumberPrimitive from './shapes/NumberPrimitive';
 
@@ -32,6 +33,9 @@ class Conjurer extends React.Component {
 
     // Listener for event from the Parts Bin
     ee.addListener(Event.PARTS_BIN_CLONE_ITEM_EVENT, this.cloneItem.bind(this));
+
+    // Listener for event from number primitive
+    ee.addListener(Event.NUMBER_PRIMITIVE_UPDATE_VALUE, this.updateNumberPrimitive.bind(this));
 
     // coordinate data for drawing shapes
     this.x_orig = 0;
@@ -146,13 +150,29 @@ class Conjurer extends React.Component {
 
   // Clone parts bin item given an emitted event
   cloneItem(item) {
-    item.id = this.dragref;
-    item.ref = this.dragref;
-    item.x = window.innerWidth/2;
-    item.y = window.innerHeight/2;
+    var nitem = item.copy();
+    nitem.id = this.dragref;
+    nitem.ref = this.dragref;
+    nitem.x = window.innerWidth/2;
+    nitem.y = window.innerHeight/2;
+    
+    console.log("Clone item in Conjurer");
+    console.log(nitem);
+
+    var that = this;
+    nitem.shapes.map(function(shape, i) {
+      shape.id = that.dragref + "-" + i;
+      return shape;
+    });
+
+    /*this.setState({
+      objects: this.state.objects.concat(nitem)
+    });*/
 
     this.setState({
-      objects: this.state.objects.concat(item)
+      objects: this.state.objects.concat(nitem)
+    }, function() {
+      ee.emitEvent(Event.OBJECTS_STATE_UPDATED, [this.state.objects[0]]);
     });
 
     this.dragref++;
@@ -276,20 +296,42 @@ class Conjurer extends React.Component {
     var newObject = {
       x: 300,
       y: 300,
-      key: getNewKey(),
-      shapes: [new Shape({
+      id: this.dragref,
+      ref: this.dragref,
+      shapes: [new NumberShape({
+                id: this.dragref + "-0", 
                 type: 'number',
                 top: 0,
                 left: 0,
                 width: 80,
                 height: 80,
-                color: "#E21212"
+                color: "#E21212",
+                value: 100
               })]
     };
+
+    this.dragref++;
 
     // Emit an event to parts bin to add a new item, and clean the scene
     ee.emitEvent(Event.PARTS_BIN_ADD_ITEM_EVENT, [newObject]);
     this.setState({newShapes: []});
+  }
+
+  updateNumberPrimitive(id, value) {
+    var gid = id.split('-')[0];
+    var obj = this.state.objects.filter(function(s) {
+      return s.id == gid;
+    })[0];
+
+    if (obj == null)
+      return;
+
+    obj.shapes[0].value = value;
+
+    console.log("Update # id: " + id + " and val: " + value);
+    console.log(this.state.objects);
+    console.log("gid: " + gid);
+    console.log(obj);
   }
   
   render() {
