@@ -25,6 +25,9 @@ class NumberPrimitive extends React.Component {
 	}
 
 	componentWillMount() {
+		console.log("Comp will mount");
+		console.log("Number Primitive " + this.props.id);
+
 		var style = this.props.style;
 		this.style = {
 			top: style.top || 0,
@@ -50,7 +53,9 @@ class NumberPrimitive extends React.Component {
 		this.style.charTotalMax = Math.min(charTotal, 7);
 	
 		// Placeholder number
-		this.defaultValue = "7";
+		this.defaultValue = this.props.value.toString();
+
+		console.log(this.props);
 
 		this.state = {
 			value: this.defaultValue,
@@ -60,6 +65,9 @@ class NumberPrimitive extends React.Component {
 			isCursorMoving: false,
 			hasKeyEvents: false 
 		};
+
+		// Propagate state value to parent
+		//ee.emitEvent(Event.NUMBER_PRIMITIVE_UPDATE_VALUE, [this.props.id, this.state.value]);
 	}
 
 	componentWillReceiveProps() {
@@ -106,10 +114,14 @@ class NumberPrimitive extends React.Component {
 				curState.value = this.defaultValue;
 			}
 
+			// Update state
 			curState.value = parseInt(curState.value).toString();
 			curState.curColNum = curState.value.length;
 			curState.hasKeyEvents = false;
 			this.updateState(curState);
+
+			// Propagate state value to parent
+			ee.emitEvent(Event.NUMBER_PRIMITIVE_UPDATE_VALUE, [this.props.id, curState.value]);
 
 			window.removeEventListener('keydown', this.handleKeyDown, false);
 			window.removeEventListener('keypress', this.handleKeyPress, false);
