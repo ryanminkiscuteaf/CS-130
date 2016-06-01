@@ -24,7 +24,9 @@
     "react": "^0.14.0",
     "react-canvas": "^1.1.0",
     "react-dom": "^0.14.0",
-    "wolfy87-eventemitter": "^4.3.0"
+    "wolfy87-eventemitter": "^4.3.0",
+    "react-router": "^1.0.3",
+    "history": "^1.17.0"
   },
   "devDependencies": {
     "babel": "^6.5.0",
