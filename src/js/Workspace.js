@@ -1,25 +1,21 @@
-/**
- * Created by lowellbander on 4/12/16.
- */
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ReactCanvas from 'react-canvas';
 
+import Nav from './Nav';
+
+import DaButton from './DaButton';
+import PartsBin from './PartsBin';
+import CodeEditor from './CodeEditor';
+
 import Draggable from './Draggable';
 import Generic from './Generic';
-import PartsBin from './PartsBin';
-
-import Button from './Button';
-import DaButton from './DaButton';
-import CodeEditor from './CodeEditor';
 
 import Obj from './Obj';
 import Anchor from './Anchor';
 import Shape from './Shape';
 import NumberShape from './NumberShape';
 import NumberPrimitive from './shapes/NumberPrimitive';
-
 import LineShape from './LineShape';
 import Line from './shapes/Line';
 
@@ -36,12 +32,10 @@ class Workspace extends React.Component {
     super(props);
     this.state = {};
 
-    // Listener for event from the Parts Bin
-    ee.addListener(Event.PARTS_BIN_CLONE_ITEM_EVENT, this.cloneItem.bind(this));
-
-    // Listener for event from code editor
-    ee.addListener(Event.HIGHLIGHT_NODES, this.highlightNodes.bind(this));
-    ee.addListener(Event.CREATE_OPERATOR_TREE, this.createOperatorTree.bind(this));
+    // Event handlers 
+    this.cloneItem = this.cloneItem.bind(this);
+    this.highlightNodes = this.highlightNodes.bind(this);
+    this.createOperatorTree = this.createOperatorTree.bind(this);
 
     // coordinate data for drawing shapes
     this.x_orig = 0;
@@ -52,16 +46,23 @@ class Workspace extends React.Component {
     this.handleCollision = this.handleCollision.bind(this);
     this.mount = this.mount.bind(this);
 
+    // Unique id
     this.dragref = 0;
-
-    // List of ids to highlight
-    this.ids = [];
 
     // Creating Mode
     this.creatingMode = false;
+
+     // List of ids to highlight
+    this.highlightData = {};
+
+    // Canvas size
+    this.canvasWidth = window.innerWidth;
+    this.canvasHeight = window.innerHeight - 50 - 20;
   }
 
   componentWillMount() {
+    console.log("Workspace mount");
+
     this.state = {
       isDrawing: false,
       objects: [],
@@ -69,14 +70,32 @@ class Workspace extends React.Component {
       clone: null,
       newShapes: []
     };
+
+    // Listener for event from the Parts Bin
+    ee.addListener(Event.PARTS_BIN_CLONE_ITEM_EVENT, this.cloneItem);
+
+    // Listener for event from code editor
+    ee.addListener(Event.HIGHLIGHT_NODES, this.highlightNodes);
+    ee.addListener(Event.CREATE_OPERATOR_TREE, this.createOperatorTree); 
+  }
+
+  componentWillUnmount() {
+    console.log("Workspace unmount");
+
+    // Listener for event from the Parts Bin
+    ee.removeListener(Event.PARTS_BIN_CLONE_ITEM_EVENT, this.cloneItem);
+
+    // Listener for event from code editor
+    ee.removeListener(Event.HIGHLIGHT_NODES, this.highlightNodes);
+    ee.removeListener(Event.CREATE_OPERATOR_TREE, this.createOperatorTree);
   }
 
   highlightNodeRecursive(id, obj) {
     var oldColor;
     
     if (obj.id == id) {
-      oldColor = obj.shapes[0].color;
-      obj.shapes[0].color = Color.HIGHLIGHTED_NODE;
+      oldColor = obj.getHead().color;
+      obj.getHead().color = this.highlightData.ids.length <= 0 && this.highlightData.isSearch && this.highlightData.isNodeFound ? Color.HIGHLIGHTED_FOUND_NODE : Color.HIGHLIGHTED_NODE;
 
       //console.log("Force update id: " + id);
       
@@ -85,15 +104,17 @@ class Workspace extends React.Component {
         //console.log("Done force update id: " + id);
 
         setTimeout(function() {
-          obj.shapes[0].color = oldColor;
+          obj.getHead().color = oldColor;
           that.forceUpdate(function() {
             setTimeout(function() {
-              if (that.ids.length > 0)
-                that.highlightNode(that.ids.shift());
-            }, 500);
+              if (that.highlightData.ids.length > 0)
+                that.highlightNode(that.highlightData.ids.shift());
+              else if ( that.highlightData.isSearch && !that.highlightData.isNodeFound )
+                window.alert("Number not found! =(");
+            }, 555);
           });
 
-        }, 500);
+        }, that.highlightData.ids.length <= 0 && that.highlightData.isSearch && that.highlightData.isNodeFound ? 2222 : 555);
 
       });
 
@@ -110,11 +131,11 @@ class Workspace extends React.Component {
     this.highlightNodeRecursive(id, obj);
   }
 
-  highlightNodes(ids) {
-    this.ids = ids;
+  highlightNodes(data) {
+    this.highlightData = data;
 
-    if (this.ids.length > 0)
-      this.highlightNode(this.ids.shift());
+    if (this.highlightData.ids.length > 0)
+      this.highlightNode(this.highlightData.ids.shift());
   }
 
   createOperatorTree(obj) {
@@ -125,104 +146,13 @@ class Workspace extends React.Component {
     });
   }
 
-  handleDoubleClick(e) {
-    // Let each "Number Primitive component" figures out if it is clicked or not
-    // This allows a previously clicked "number primitive component" to check
-    // if it is not clicked anymore so it removes its key event listeners
-    ee.emitEvent(Event.CONJURER_CLICK, [{X: e.clientX, Y: e.clientY}]);
-  }
-
-  handleMouseDown(e) {
-    // IMPORTANT: detect if CodeEditor is clicked or
-    // anything outside the CodeEditor is clicked
-    var codeEditorStyle = this.getCodeEditorStyle();
-
-    var ceX = parseInt(codeEditorStyle.left);
-    var ceY = parseInt(codeEditorStyle.top);
-    var ceX2 = ceX + parseInt(codeEditorStyle.width);
-    var ceY2 = ceY + parseInt(codeEditorStyle.height);
-
-    var isWithinCodeEditorXBoundaries = (e.clientX >= ceX) && (e.clientX <= ceX2);
-    var isWithinCodeEditorYBoundaries = (e.clientY >= ceY) && (e.clientY <= ceY2);
-
-    if (isWithinCodeEditorXBoundaries && isWithinCodeEditorYBoundaries) {
-      // CodeEditor is clicked
-      ee.emitEvent(Event.CODE_EDITOR_ON_CLICK);
-
-      // IMPORTANT: Return right away so we don't create objects where the code editor is
-      // because if the objects are created behind the code editor
-      // it will still overwrite code editor's onClick handler
-      return;
-
-    } else {
-      // CodeEditor is not clicked
-      ee.emitEvent(Event.CODE_EDITOR_OFF_CLICK);
-    }
-
-    // TODO: TEST
-    return;
-
-    /*this.isDrawing = true;
-    this.x_orig = e.clientX;
-    this.y_orig = e.clientY;
-
-    var obj = new Obj({
-      id: this.dragref,
-      ref: this.dragref,
-      x: this.x_orig,
-      y: this.y_orig,
-      shapes: [new Shape({width: 180, height: 180})],
-      width: 180,
-      height: 180
-    }); 
-    
-    this.dragref++;
-    
-    this.setState({
-      newShapes: this.state.newShapes.concat(obj)
-    });*/
-  }
-
-  getPartsBinStyle() {
-    return {
-      top: 0,
-      left: 0,
-      width: 180,
-      height: window.innerHeight,
-      backgroundColor: 'grey',
-      itemHeight: 180,
-      itemPadding: 10
-    };
-  }
-
-  getWrapperStyle() {
-    return {
-      top: 0,
-      left: 200,
-      width: window.innerWidth,
-      height: window.innerHeight
-    };
-  }
-
-  getCodeEditorStyle() {
-    var w = 300;
-    return {
-      top: 0,
-      left: window.innerWidth - w - 15,
-      width: w,
-      height: 600,
-      backgroundColor: "#000000",
-      textColor: "#ffffff"
-    };
-  }
-
   // Clone parts bin item given an emitted event
   cloneItem(item) {
     var newItem = item.copy();
     newItem.id = this.dragref;
     newItem.ref = this.dragref;
-    newItem.x = window.innerWidth/2;
-    newItem.y = window.innerHeight/2;
+    newItem.x = this.canvasWidth/2;
+    newItem.y = this.canvasHeight/2;
     
     var that = this;
     newItem.shapes.map(function(shape, i) {
@@ -236,7 +166,7 @@ class Workspace extends React.Component {
     if (this.creatingMode) {
       // In creating mode
       if (newItem.shapes.length > 1) {
-        window.alert("Cannot add the selected object in creating mode!");
+        window.alert("Cannot add the selected object in creating mode!\n\nPlease exit creating mode. =)");
         return;
       } else {
         this.setState({
@@ -245,8 +175,8 @@ class Workspace extends React.Component {
       }
     } else {
       // NOT in creating mode
-      if (newItem.shapes.length == 1 && (newItem.shapes[0].type == 'operator' || newItem.shapes[0].color === Color.ANCHOR)) {
-        window.alert("Cannot add the selected object in non-creating mode!");
+      if (newItem.shapes.length == 1 && (newItem.shapes[0].type == 'operator' || newItem.shapes[0].type == 'hook')) {
+        window.alert("Cannot add the selected object in non-creating mode!\n\nPlease enter creating mode. =)");
         return;
       } else {
         this.setState({
@@ -256,22 +186,6 @@ class Workspace extends React.Component {
         });
       }
     }
-
-    //<<<
-    if (newItem.shapes[0].type == 'number') {
-      /*newItem.shapes[0].width = 50;
-      newItem.shapes[0].height = 50;
-      newItem.width = 50;
-      newItem.height = 50;*/
-    }
-
-    /*if (newItem.shapes.length == 1 && (newItem.shapes[0].type == 'operator' || newItem.shapes[0].color === Color.ANCHOR)) {
-      this.setState({
-        newShapes: this.state.newShapes.concat(newItem)
-      });
-
-      return;
-    }*/
   }
 
   updateObjPosition(x, y, obj) {
@@ -422,9 +336,22 @@ class Workspace extends React.Component {
         return shape;
     });
 
+    var head = shapes.filter(shape => shape.type === 'number' || shape.type === 'operator');
+
+    if (head.length != 1) {
+      window.alert("There must be exactly one head (number or operator), you %&#@!");
+      return;
+    }
+
     var children = shapes.filter(function(c) {
-      return c.color === Color.ANCHOR;
+      //return c.color === Color.ANCHOR;
+      return c.type === 'hook';
     });
+
+    if (children.length != 2) {
+      window.alert("There must be exactly two hooks, you dumbass!");
+      return;
+    }
 
     // Sort the children such that the left child appears before the right child
     children.sort(function(a, b) {
@@ -438,7 +365,17 @@ class Workspace extends React.Component {
     });
 
     // Add lines connecting the parent and its children
-    var head = shapes[0];
+
+    // TODO
+    // Head must either be red or green
+    // There must be only one head
+
+    // There must be two children
+    // Child must be purple
+
+    // Otherwise error
+
+    head = head[0];
     var lc = children[0];
     var rc = children[1];
 
@@ -476,6 +413,23 @@ class Workspace extends React.Component {
     this.setState({newShapes: []});
   }
   
+  
+  /**
+   * Parts Bin
+   */
+  
+  getPartsBinInitialItems() {
+    var primitives = []
+    primitives.push(this.getAnchor());
+    primitives.push(this.getNumberPrimitive(69));
+    primitives.push(this.getOperatorPrimitive("+"));
+    primitives.push(this.getOperatorPrimitive("-"));
+    primitives.push(this.getOperatorPrimitive("*"));
+    primitives.push(this.getOperatorPrimitive("/"));
+
+    return primitives;
+  }
+
   getAnchor() {
     this.x_orig = 300;
     this.y_orig = 200;
@@ -491,6 +445,29 @@ class Workspace extends React.Component {
     this.dragref++;
 
     return anchor;
+  }
+
+  getNumberPrimitive(value) {
+    var numPrimitive = {
+      x: 300,
+      y: 300,
+      id: this.dragref,
+      ref: this.dragref,
+      shapes: [new NumberShape({
+                id: this.dragref + "-0", 
+                type: 'number',
+                top: 0,
+                left: 0,
+                width: 80,
+                height: 80,
+                color: Color.NUMBER_PRIMITIVE,
+                value: value || 7
+              })]
+    };
+
+    this.dragref++;
+
+    return numPrimitive;
   }
 
   getOperatorPrimitive(operator) {
@@ -518,46 +495,97 @@ class Workspace extends React.Component {
     return newObject;
   }
 
-  getPartsBinInitialItems() {
-    var primitives = []
-    primitives.push(this.getAnchor());
-    primitives.push(this.getNumberPrimitive(69));
-    primitives.push(this.getOperatorPrimitive("+"));
-    primitives.push(this.getOperatorPrimitive("-"));
-    primitives.push(this.getOperatorPrimitive("*"));
-    primitives.push(this.getOperatorPrimitive("/"));
-
-    return primitives;
-  }
-
-  getNumberPrimitive(value) {
-    var numPrimitive = {
-      x: 300,
-      y: 300,
-      id: this.dragref,
-      ref: this.dragref,
-      shapes: [new NumberShape({
-                id: this.dragref + "-0", 
-                type: 'number',
-                top: 0,
-                left: 0,
-                width: 80,
-                height: 80,
-                color: Color.NUMBER_PRIMITIVE,
-                value: value || 7
-              })]
-    };
-
-    this.dragref++;
-
-    return numPrimitive;
-  }
-
   clearWorkspace() {
     this.setState({
       objects: [],
       newShapes: []
     });
+
+    this.highlightData = {};
+  }
+
+  toggleCreatingMode() {
+    this.clearWorkspace();
+    this.creatingMode = !this.creatingMode;
+    this.forceUpdate();
+  }
+
+  /**
+   * Mouse Events
+   */
+
+  handleDoubleClick(e) {
+    // Let each "Number Primitive component" figures out if it is clicked or not
+    // This allows a previously clicked "number primitive component" to check
+    // if it is not clicked anymore so it removes its key event listeners
+
+    // IMPORTANT: subtract the width of the nav bar from mouse Y
+    ee.emitEvent(Event.CONJURER_CLICK, [{X: e.clientX, Y: e.clientY - 50}]);
+  }
+
+  handleMouseDown(e) {
+    // IMPORTANT: detect if CodeEditor is clicked or
+    // anything outside the CodeEditor is clicked
+    var codeEditorStyle = this.getCodeEditorStyle();
+
+    var ceX = parseInt(codeEditorStyle.left);
+    var ceY = parseInt(codeEditorStyle.top);
+    var ceX2 = ceX + parseInt(codeEditorStyle.width);
+    var ceY2 = ceY + parseInt(codeEditorStyle.height);
+
+    var isWithinCodeEditorXBoundaries = (e.clientX >= ceX) && (e.clientX <= ceX2);
+    var isWithinCodeEditorYBoundaries = (e.clientY >= ceY) && (e.clientY <= ceY2);
+
+    if (isWithinCodeEditorXBoundaries && isWithinCodeEditorYBoundaries) {
+      // CodeEditor is clicked
+      ee.emitEvent(Event.CODE_EDITOR_ON_CLICK);
+
+      // IMPORTANT: Return right away so we don't create objects where the code editor is
+      // because if the objects are created behind the code editor
+      // it will still overwrite code editor's onClick handler
+      return;
+
+    } else {
+      // CodeEditor is not clicked
+      ee.emitEvent(Event.CODE_EDITOR_OFF_CLICK);
+    }
+  }
+
+  /**
+   * Render
+   */ 
+
+  getPartsBinStyle() {
+    return {
+      top: 0,
+      left: 0,
+      width: 180,
+      height: this.canvasHeight,
+      backgroundColor: 'grey',
+      itemHeight: 180,
+      itemPadding: 10
+    };
+  }
+
+  getWrapperStyle() {
+    return {
+      top: 0,
+      left: 200,
+      width: this.canvasWidth,
+      height: this.canvasHeight
+    };
+  }
+
+  getCodeEditorStyle() {
+    var w = 300;
+    return {
+      top: 0,
+      left: this.canvasWidth - w,
+      width: w,
+      height: 600,
+      backgroundColor: "#000000",
+      textColor: "#ffffff"
+    };
   }
 
   getToggleModeButtonStyle() {
@@ -568,17 +596,6 @@ class Workspace extends React.Component {
       height: 36,
       color: "#ffffff",
       backgroundColor: this.creatingMode ? Color.WARNING_BUTTON : Color.GO_BUTTON
-    };
-  }
-
-  getSaveButtonStyle() {
-    return {
-      top: 10,
-      left: 540,
-      width: 70,
-      height: 36,
-      color: "#ffffff",
-      backgroundColor: Color.DEFAULT_BUTTON
     };
   }
 
@@ -593,35 +610,40 @@ class Workspace extends React.Component {
     };
   }
 
-  toggleCreatingMode() {
-    this.clearWorkspace();
-    this.creatingMode = !this.creatingMode;
-    this.forceUpdate();
+  getSaveButtonStyle() {
+    return {
+      top: 10,
+      left: 530,
+      width: 150,
+      height: 36,
+      color: "#ffffff",
+      backgroundColor: Color.DEFAULT_BUTTON
+    };
   }
-  
-  render() {
-    var surfaceWidth = window.innerWidth;
-    var surfaceHeight = window.innerHeight;
 
+  render() {
     var modeText = this.creatingMode ? "Exit Creating Mode" : "Enter Creating Mode";
-    var renderSaveButton = this.creatingMode && <DaButton key={"workspace-save-button"} style={this.getSaveButtonStyle()} onClick={this.saveObject.bind(this)}>Save</DaButton>;
+    var renderSaveButton = this.creatingMode && <DaButton key={"workspace-save-button"} style={this.getSaveButtonStyle()} onClick={this.saveObject.bind(this)}>Save to Parts Bin</DaButton>;
     
     return (
-      <Surface width={surfaceWidth} height={surfaceHeight} left={0} top={0}>
-        <PartsBin style={this.getPartsBinStyle()} initialItems={this.getPartsBinInitialItems()} />
-        <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)} onDoubleClick={this.handleDoubleClick.bind(this)}>
-          {this.state.objects.map(this.renderObject)}
-          {this.state.newShapes.map(this.renderObject)}
-          <DaButton key={"workspace-creating-mode-button"} 
-                    style={this.getToggleModeButtonStyle()} 
-                    onClick={this.toggleCreatingMode.bind(this)}>
-              {modeText}
-          </DaButton>
-          <DaButton key={"workspace-clear-button"} style={this.getClearButtonStyle()} onClick={this.clearWorkspace.bind(this)}>Clear</DaButton>
-          {renderSaveButton}
-        </Group>
-        <CodeEditor style={this.getCodeEditorStyle()} />
-      </Surface>
+      <div>
+        <Nav />
+        <Surface width={this.canvasWidth} height={this.canvasHeight} left={0} top={0}>
+          <PartsBin style={this.getPartsBinStyle()} initialItems={this.getPartsBinInitialItems()} />
+          <Group style={this.getWrapperStyle()} onMouseDown={this.handleMouseDown.bind(this)} onDoubleClick={this.handleDoubleClick.bind(this)}>
+            {this.state.objects.map(this.renderObject)}
+            {this.state.newShapes.map(this.renderObject)}
+            <DaButton key={"workspace-creating-mode-button"} 
+                      style={this.getToggleModeButtonStyle()} 
+                      onClick={this.toggleCreatingMode.bind(this)}>
+                {modeText}
+            </DaButton>
+            <DaButton key={"workspace-clear-button"} style={this.getClearButtonStyle()} onClick={this.clearWorkspace.bind(this)}>Clear</DaButton>
+            {renderSaveButton}
+          </Group>
+          <CodeEditor style={this.getCodeEditorStyle()} />
+        </Surface>
+      </div>
     );
   }
 }
