@@ -2,6 +2,9 @@ import React from 'react';
 import ReactCanvas from 'react-canvas';
 import Cursor from './code-editor/Cursor';
 import DaButton from './DaButton';
+import Obj from './Obj';
+import NumberShape from './NumberShape';
+import LineShape from './LineShape';
 
 let Group = ReactCanvas.Group;
 let Text = ReactCanvas.Text;
@@ -11,20 +14,38 @@ let measureText = ReactCanvas.measureText;
 let Event = require('./event/EventNames');
 let ee = require('./event/EventEmitter');
 
+let Color = require('./ColorConstants');
+let NODE_SPACE = 50 + 30;
+
 class CodeEditor extends React.Component {
 	constructor() {
 		super();
 
 		this.currentObject = {};
 
+		// Key event listeners
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyUp = this.handleKeyUp.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
 
-		// Add event listeners
-		ee.addListener(Event.CODE_EDITOR_ON_CLICK, this.listenToKeyEvents.bind(this));
-		ee.addListener(Event.CODE_EDITOR_OFF_CLICK, this.unlistenToKeyEvents.bind(this));
-		ee.addListener(Event.OBJECTS_STATE_UPDATED, this.setCurrentObject.bind(this));
+		// Event listeners
+		this.listenToKeyEvents = this.listenToKeyEvents.bind(this);
+		this.unlistenToKeyEvents = this.unlistenToKeyEvents.bind(this);
+		this.setCurrentObject = this.setCurrentObject.bind(this);
+
+		// Nodes
+		this.highlightNode = this.highlightNode.bind(this);
+		this.performOperation = this.performOperation.bind(this);
+		this.performDFS = this.performDFS.bind(this);
+
+		this.nodes = [];
+		this.foundNode = "";
+		this.isNodeFound = false;
+		this.isSearch = false;
+		this.mathTraces = [];
+
+		// Global ID
+		this.nodeId = 6669990;
 	}
 
 	componentWillMount() {
@@ -48,7 +69,7 @@ class CodeEditor extends React.Component {
 			buttonHeight: 36,
 			buttonWidth: 70,
 			buttonColor: "#ffffff",
-			buttonBackgroundColor: "#0099ff"
+			buttonBackgroundColor: Color.DEFAULT_BUTTON
 		};
 
 		// Measure and cache char width
@@ -69,15 +90,17 @@ class CodeEditor extends React.Component {
 			hasKeyEvents: false
 		};
 
-		// TEST
-		/*for (var i = 32; i < 126; i++) {
-			var c = String.fromCharCode(i);
-			console.log(c + " : " + this.measureCharWidth(c));
-		}*/
+		// Add event listeners
+		ee.addListener(Event.CODE_EDITOR_ON_CLICK, this.listenToKeyEvents);
+		ee.addListener(Event.CODE_EDITOR_OFF_CLICK, this.unlistenToKeyEvents);
+		ee.addListener(Event.OBJECTS_STATE_UPDATED, this.setCurrentObject);
 	}
 
 	componentWillUnmount() {
-		
+		// Remove event listeners
+		ee.removeListener(Event.CODE_EDITOR_ON_CLICK, this.listenToKeyEvents);
+		ee.removeListener(Event.CODE_EDITOR_OFF_CLICK, this.unlistenToKeyEvents);
+		ee.removeListener(Event.OBJECTS_STATE_UPDATED, this.setCurrentObject);
 	}
 
 	listenToKeyEvents() {	
@@ -738,8 +761,8 @@ class CodeEditor extends React.Component {
   	return {
 	  	top: this.style.top + this.style.height - this.style.divHeight + ((this.style.divHeight - this.style.buttonHeight) / 2),
 	  	left: this.getLeftmostLinePos(),
-	  	height: this.style.buttonHeight,
 	  	width: this.style.buttonWidth,
+	  	height: this.style.buttonHeight,
 	  	color: this.style.buttonColor,
 	  	backgroundColor: this.style.buttonBackgroundColor
   	};
@@ -803,6 +826,10 @@ class CodeEditor extends React.Component {
 		);
 	}
 
+	/**
+	 * Code
+	 */
+
 	setCurrentObject(object) {
 		this.currentObject = object;
 	}
@@ -817,32 +844,395 @@ class CodeEditor extends React.Component {
 		});
 
 		console.log(this.currentObject);
-		var result;
-		code = "var codeToRun = function () {" + code + "};" +
-			"result = codeToRun.bind(this.currentObject)();";
-		console.log(code);
-		eval(code);
-		console.log(result);
+		var order = 0;
 
-		var sum = this.childSum(result);
-		console.log("Sum of children! : " + sum);
+		// Remove all newlines for comparison
+		code = code.replace(/(\r\n|\n|\r)/gm,"");
 
-		window.alert("Sum of children: " + sum);
+		var dfsPattern = /dfs\([0-9]+\)/g;
+		var bfsPattern = /bfs\([0-9]+\)/g;
+		var numPattern = /[0-9]+/g;
+
+		var isDFS =  false;
+		var isBFS =  false;
+		var value = 0;
+
+		var infixExpPattern = /^\s*[0-9]+(\s*[\-+*\/]\s*[0-9]+)+\s*$/g; // TODO: make it more robust later
+
+		if (code == "L2R") {
+			code = "return this";
+			order = 0;
+		} else if (code == "R2L") {
+			code = "return this";
+			order = 1;
+		} else if (code.match(dfsPattern)) {
+			// DFS
+			value = parseInt(code.match(numPattern));
+			code = "return this";
+			isDFS = true;
+		} else if (code.match(bfsPattern)) {
+			// BFS
+			value = parseInt(code.match(numPattern));
+			code = "return this";
+			isBFS = true;
+		} else if (code.match(infixExpPattern)) {
+			// Infix expression -> operator tree
+			console.log(code);
+
+			code = code.replace(/(\s)/gm,"");
+
+			// Parse the expression to tokens
+			var tokens = [];
+			var i = 0;
+			var opPattern = /[\-+*\/]/g; 
+
+			while (i < code.length) {
+				if (code[i].toString().match(opPattern)) {
+					// Current char is an operator
+					tokens.push(code[i]);
+					i++;
+				} else {
+					// Current char is a number
+					var curToken = "";
+					while (i < code.length && code[i].toString().match(/[0-9]/g)) {
+						curToken += code[i];
+						i++;
+					}
+
+					tokens.push(parseInt(curToken));
+				}
+			}
+
+			// Convert infix expression to postfix expression
+			var opStack = [];
+			var postTokens = [];
+			for (var j = 0; j < tokens.length; j++) {
+				var curToken = tokens[j];
+
+				if (Number.isInteger(curToken)) {
+					postTokens.push(curToken);
+				} else {
+					if (opStack.length <= 0) {
+						opStack.push(curToken);
+					} else {
+						if (opStack[opStack.length-1] == "*" || opStack[opStack.length-1] == "/") {
+							postTokens.push(opStack.pop());
+							opStack.push(curToken);
+						} else {
+							if (curToken == "*" || curToken == "/") {
+								opStack.push(curToken);
+							} else {
+								postTokens.push(opStack.pop());
+								opStack.push(curToken);
+							}
+						}
+					}
+				}
+			}
+
+			// Pop the remaining tokens form stack
+			while (opStack.length > 0) {
+				postTokens.push(opStack.pop());
+			}
+
+			console.log("Infix");
+			console.log(tokens);
+
+			console.log("Post fix");
+			console.log(postTokens);
+
+			var treeObj = this.createTree(postTokens, 400, 60, NODE_SPACE, 0);
+			console.log("Tree");
+			console.log(treeObj);
+
+			ee.emitEvent(Event.CREATE_OPERATOR_TREE, [treeObj]);
+
+			return;
+		} else {
+			code = "";
+			window.alert("Invalid command!");
+			return;
+		}
+
+		var curObj;
+		var newCode = "var codeToRun = function () {" + code + "};" +
+			"curObj = codeToRun.bind(this.currentObject)();";
+		console.log(newCode);
+		eval(newCode);
+		console.log(curObj);
+
+		if (isDFS) {
+			this.isNodeFound = this.performDFS(curObj, value);
+			this.isSearch = true;
+		} else if (isBFS) {
+			this.isNodeFound = this.performBFS(curObj, value);
+			this.isSearch = true;
+		} else {
+			var result = this.performOperation(curObj, order);
+			console.log("Operation result : " + result);
+
+			this.mathTraces.push([""]);
+			this.mathTraces.push(["Final result: " + result]);
+
+			console.log(this.mathTraces);
+
+			// Append the math traces to texts
+			// Update state
+			var curState = this.state;
+			curState.texts = curState.texts.concat(this.mathTraces);
+			curState.curLineNum = curState.curLineNum + this.mathTraces.length;
+			curState.lineTotal = curState.lineTotal + this.mathTraces.length;
+			curState.curColNum = this.mathTraces[this.mathTraces.length - 1][0].length;
+			this.updateState(curState);
+			
+			// Empty math traces
+			this.mathTraces = [];
+		}
+
+		//window.alert("Sum of children: " + sum);
+
+		// Send the list of nodes to be executed
+		ee.emitEvent(Event.HIGHLIGHT_NODES, [{
+			ids: this.nodes,
+			isNodeFound: this.isNodeFound,
+			foundNode: this.foundNode,
+			isSearch: this.isSearch
+		}]);
 	}
 
-	childSum(obj) {
+	getNodeId() {
+		return this.nodeId++;
+	}
+
+	createTree(tokens, parentX, parentY, shapeX, shapeY) {
+		var parentToken = tokens.pop();
+		var parentId = this.getNodeId();
+		
+		var parentObj = new Obj({
+      id: parentId,
+      ref: parentId,
+      x: parentX,
+      y: parentY,
+      shapes: [new NumberShape({
+                id: parentId + "-0", 
+                type: 'operator',
+                top: shapeY,
+                left: shapeX,
+                width: 50,
+                height: 50,
+                color: Color.OPERATOR_PRIMITIVE,
+                value: parentToken
+              })],
+      children: []
+    });
+
+		var rightChildId = this.getNodeId();
+		var leftChildId = this.getNodeId();
+		var rightChildObj;
+    var leftChildObj;
+
+		var rightToken = tokens[tokens.length-1];
+		var isRightTokenOp = false;
+
+		if (Number.isInteger(rightToken)) {
+
+			// IMPORTANT
+			tokens.pop();
+
+			rightChildObj = new Obj({
+	      id: rightChildId,
+	      ref: rightChildId,
+	      x: parentX,
+	      y: parentY,
+	      shapes: [new NumberShape({
+	                id: rightChildId + "-0", 
+	                type: 'number',
+	                top: shapeY + NODE_SPACE,
+	                left: shapeX + NODE_SPACE,
+	                width: 50,
+	                height: 50,
+	                color: Color.NUMBER_PRIMITIVE,
+	                value: rightToken.toString()
+	              })],
+	      children: []
+	    });
+
+		} else {
+			isRightTokenOp = true;
+			rightChildObj = this.createTree(tokens, parentX, parentY, shapeX + NODE_SPACE, shapeY + NODE_SPACE);
+		}
+
+		var leftToken = tokens[tokens.length-1];
+
+		if (Number.isInteger(leftToken)) {
+
+			// IMPORTANT
+			tokens.pop();
+
+			leftChildObj = new Obj({
+	      id: leftChildId,
+	      ref: leftChildId,
+	      x: parentX,
+	      y: parentY,
+	      shapes: [new NumberShape({
+	                id: leftChildId + "-0", 
+	                type: 'number',
+	                top: shapeY + NODE_SPACE,
+	                left: shapeX - NODE_SPACE,
+	                width: 50,
+	                height: 50,
+	                color: Color.NUMBER_PRIMITIVE,
+	                value: leftToken.toString()
+	              })],
+	      children: []
+	    });
+
+		} else {
+			leftChildObj = this.createTree(tokens, parentX, parentY, shapeX - NODE_SPACE - (isRightTokenOp ? NODE_SPACE * 2 : 0), shapeY + NODE_SPACE);
+		}
+
+		// Add lines connecting the parent and its children
+    var head = parentObj.shapes[0];
+    var lc = leftChildObj.shapes[0];
+    var rc = rightChildObj.shapes[0];
+
+    var ll = new LineShape({
+                type: 'line',
+                top: head.top + head.height,
+                left: lc.left + lc.width,
+                width: head.left - (lc.left + lc.width),
+                height: lc.top - (head.top + head.height),
+                direction: 0
+              });
+
+    var rl = new LineShape({
+                type: 'line',
+                top: head.top + head.height,
+                left: head.left + head.width,
+                width: rc.left - (head.left + head.width),
+                height: rc.top - (head.top + head.height),
+                direction: 1
+              });
+
+    parentObj.shapes.push(ll);
+    parentObj.shapes.push(rl);
+
+
+		// Push children nodes to parent
+		parentObj.children = [leftChildObj, rightChildObj];
+
+		return parentObj;
+	}
+
+	highlightNode(id) {
+		console.log("Executing id: " + id);
+		this.nodes.push(id);
+	}
+
+	performDFS(obj, value) {
 		if (obj.children.length <= 0) {
-			return parseInt(obj.shapes[0].value);
+			this.highlightNode(obj.id);
+			var found = parseInt(obj.getNumberNode().value) === value;
+
+			if (found)
+				this.foundNode = obj.id;
+
+			return found;
+		}
+
+		// IMPORTANT: We assume that the children are either 0 or 2
+		var sortedChildren = this.sortChildrenNodes(obj.children, 0);
+
+		this.highlightNode(obj.id);
+
+		if (parseInt(obj.getNumberNode().value) === value) {
+			this.foundNode = obj.id;
+			return true; 
+		}
+
+		var l = this.performDFS(sortedChildren[0], value);
+		if (l)
+			return true;
+
+		var r = this.performDFS(sortedChildren[1], value);
+		if (r)
+			return true;
+
+		return false;
+	}
+
+	performBFS(obj, value) {
+		var children = [obj];
+
+		while (children.length > 0) {
+			var curObj = children.shift();
+			this.highlightNode(curObj.id);
+
+			if (parseInt(curObj.getNumberNode().value) === value) {
+				this.foundNode = curObj.id;
+				return true;
+			}
+
+			// IMPORTANT: We assume that the children are either 0 or 2
+			var sortedChildren = this.sortChildrenNodes(curObj.children, 0);
+			children = children.concat(sortedChildren);
+		}
+
+		return false;
+	}
+
+	sortChildrenNodes(nodes, order) {
+		console.log("Sorting nodes");
+
+		nodes.sort(function(a, b) {
+			/*if (a.shapes[0].left < b.shapes[0].left)
+				return order ? 1 : -1;
+
+			if (a.shapes[0].left > b.shapes[0].left)
+				return order ? -1 : 1;*/
+
+			var aHead = a.getHead();
+			var bHead = b.getHead();
+
+			if (aHead.left < bHead.left)
+				return order ? 1 : -1;
+
+			if (aHead.left > bHead.left)
+				return order ? -1 : 1;
+
+			return 0;
+		});
+
+		return nodes;
+	}
+
+	performOperation(obj, order) {
+		if (obj.children.length <= 0) {
+			this.highlightNode(obj.id);
+			return parseInt(obj.getNumberNode().value);
 		}
 
 		// Non-leaf node
 		var sum = 0;
 		var that = this;
 		
-		obj.children.forEach(function(child) {
-			// Calculate the result
-			sum += that.childSum(child);
-		});
+		// IMPORTANT: We assume that the children are either 0 or 2
+		var sortedChildren = this.sortChildrenNodes(obj.children, order);
+
+		this.highlightNode(obj.id);
+		var leftTotal = this.performOperation(sortedChildren[0], order);
+
+		this.highlightNode(obj.id);
+		var rightTotal = this.performOperation(sortedChildren[1], order);
+
+		var expression = parseFloat(leftTotal).toFixed(2) + " " + obj.getOperatorNode().value + " " + parseFloat(rightTotal).toFixed(2);
+		sum = eval(expression).toFixed(2);
+
+		console.log(expression + " = " + sum);
+
+		this.mathTraces.push([expression + " = " + sum]); 
+
+		this.highlightNode(obj.id);
 
 		return sum;
 	}
