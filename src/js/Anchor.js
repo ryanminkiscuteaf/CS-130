@@ -1,17 +1,17 @@
 import Obj from './Obj';
 import Shape from './Shape';
 
-let ANCHOR_COLOR = "#903fd1";
+let Color = require('./ColorConstants');
 
 class Anchor extends Obj {
    constructor ({id, ref, x, y}={}) {
       var anchor = new Shape({
-        type: 'circle',
+        type: 'hook',
         top: 0,
         left: 0,
-        width: 50,
-        height: 50,
-        color: ANCHOR_COLOR
+        width: 180,
+        height: 180,
+        color: Color.ANCHOR
       });
       super({
          id: id,
