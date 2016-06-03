@@ -1,12 +1,15 @@
 import React from 'react';
 import ReactCanvas from 'react-canvas';
 
-import DraggableComponent from './DraggableComponent';
 import Circle from './shapes/Circle';
+import Hook from './shapes/Hook';
 import Rectangle from './shapes/Rectangle';
+import OperatorPrimitive from './shapes/OperatorPrimitive';
 import NumberPrimitive from './shapes/NumberPrimitive';
+import Line from './shapes/Line';
 
 let Group = ReactCanvas.Group;
+let Color = require('./ColorConstants');
 
 class Generic extends React.Component {
   constructor() {
@@ -114,22 +117,36 @@ class Generic extends React.Component {
       top: pos_y + this.state.absolute_offset.y,
       left: pos_x + this.state.absolute_offset.x,
       width: this.state.width,
-      height: this.state.height,
-      backgroundColor: '#00ff00'
+      height: this.state.height
     };
   }
 
   renderShape(pos_x, pos_y, shape) {
-    if (shape.type == "circle") {
-      return this.renderCircle(pos_x, pos_y, shape);
-    } else if (shape.type == "number") {
-      return this.renderNumberPrimitive(pos_x, pos_y, shape);
-    } else {
-      /* A shape is a circle by default */
-      return this.renderCircle(pos_x, pos_y, shape);
-    }
-  }
 
+    switch (shape.type) {
+      case 'circle':
+        return this.renderCircle(pos_x, pos_y, shape);
+
+      case 'hook':
+        return this.renderHook(pos_x, pos_y, shape);
+
+      case 'operator':
+        return this.renderOperatorPrimitive(pos_x, pos_y, shape);
+        
+      case 'number':
+        return this.renderNumberPrimitive(pos_x, pos_y, shape);
+
+      case 'line':
+        return this.renderLine(pos_x, pos_y, shape);
+
+      case 'group':
+        return this.renderGroup(pos_x, pos_y, shape);
+        
+      default:
+        return this.renderCircle(pos_x, pos_y, shape);
+    } 
+  }
+  
   renderCircle(pos_x, pos_y, shape) {
     return (
       <Circle
@@ -139,8 +156,37 @@ class Generic extends React.Component {
           left: pos_x + this.state.absolute_offset.x,
           width: shape.width * this.ratio,
           height: shape.height * this.ratio,
-          borderWidth: 1,
-          backgroundColor: shape.color || "#003fd1"
+          backgroundColor: shape.color || Color.NODE
+        }} />
+    );
+  }
+
+  renderHook(pos_x, pos_y, shape) {
+    return (
+      <Hook
+        key={shape.id}
+        style={{
+          top: pos_y + this.state.absolute_offset.y,
+          left: pos_x + this.state.absolute_offset.x,
+          width: shape.width * this.ratio,
+          height: shape.height * this.ratio,
+          backgroundColor: shape.color || Color.ANCHOR
+        }} />
+    );
+  }
+
+  renderOperatorPrimitive(pos_x, pos_y, shape) {
+    return (
+      <OperatorPrimitive 
+        key={shape.id}
+        id={shape.id}
+        value={shape.value}
+        style={{
+          top: pos_y + this.state.absolute_offset.y,
+          left: pos_x + this.state.absolute_offset.x, 
+          width: shape.width * this.ratio,
+          height: shape.height * this.ratio,
+          backgroundColor: shape.color || Color.OPERATOR_PRIMITIVE
         }} />
     );
   }
@@ -151,6 +197,36 @@ class Generic extends React.Component {
         key={shape.id}
         id={shape.id}
         value={shape.value}
+        shape={shape}
+        style={{
+          top: pos_y + this.state.absolute_offset.y,
+          left: pos_x + this.state.absolute_offset.x, 
+          width: shape.width * this.ratio,
+          height: shape.height * this.ratio,
+          backgroundColor: shape.color || Color.NUMBER_PRIMITVE
+        }} />
+    );
+  }
+
+  renderLine(pos_x, pos_y, shape) {
+    return (
+      <Line
+        key={shape.id}
+        id={shape.id}
+        style={{
+          top: pos_y + this.state.absolute_offset.y,
+          left: pos_x + this.state.absolute_offset.x, 
+          width: shape.width * this.ratio,
+          height: shape.height * this.ratio,
+          direction: shape.direction
+        }} />
+    );
+  }
+
+  renderGroup(pos_x, pos_y, shape) {
+    return (
+      <Group
+        key={shape.id}
         style={{
           top: pos_y + this.state.absolute_offset.y,
           left: pos_x + this.state.absolute_offset.x, 
