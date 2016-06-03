@@ -67,7 +67,7 @@ class Draggable extends React.Component {
       left: this.state.x + this.state.offset[0],
       width: this.state.width,
       height: this.state.height,
-      backgroundColor: '#ff0000'
+      //backgroundColor: 'pink'
     };
   }
 
@@ -91,8 +91,7 @@ class Draggable extends React.Component {
         style={style}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
-        onMouseUp={this.handleMouseUp}
-      >
+        onMouseUp={this.handleMouseUp}>
         {clones}
       </Group>
     );
