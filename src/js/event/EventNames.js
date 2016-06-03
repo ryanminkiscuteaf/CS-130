@@ -6,5 +6,6 @@ module.exports = {
 	CODE_EDITOR_ON_CLICK: "code editor on click",
 	CODE_EDITOR_OFF_CLICK: "code editor off click",
 	CONJURER_CLICK: "conjurer click",
-	NUMBER_PRIMITIVE_UPDATE_VALUE: "number primitive update value"
+	HIGHLIGHT_NODES: "highlight nodes",
+	CREATE_OPERATOR_TREE: "create operator tree"
 };
