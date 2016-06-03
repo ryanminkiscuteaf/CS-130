@@ -17,26 +17,3 @@ ONLY edit things in the `/src` directory, not the generated `/dist` directory. W
 You don't have to manually `grunt build` and `grunt serve` every time. Open two terminals in the `conjurer` directory, and run `grunt watch` in one and `grunt serve` in the other. The app will now automatically update with any changes you make.
 
 Create a new file for each React module. Import them as needed.
-
-***
-
-PartsBin 
-
-Please look at src/js/SampleItems.js to see the format of data the PartsBin accepts.
-
-You can pass a generic object with any size because the parts bin will automatically resize it AS LONG AS at least one of the shapes has "top = 0" and another one has "left = 0". The parts bin needs these two constraints to correctly calculate the size of the generic objects.
-
-The parts bin listens to three events:
-
-1. PARTS_BIN_ADD_ITEM_EVENT (Look at src/js/Conjurer.js for example on this)
-2. PARTS_BIN_REMOVE_ITEM_EVENT
-3. PARTS_BIN_REPLACE_ITEM_EVENT
-
-REMEMBER to use the global event emitter in src/js/event/EventEmitter.js and use the event names in src/js/event/EventNames.js.
-
-IMPORTANT:
- 
-- Generic object must have a unique id
-- Internally, parts bin uses a MAP to store generic objects so adding two objects with the same id will result in the latter overwriting the former
-- Click on the object to clone it.
-- Click anywhere on the screen to add a new object to the parts bin.
