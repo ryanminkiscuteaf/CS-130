@@ -120,7 +120,14 @@ h6 {
     padding: 100px 0;
     color: #f8f8f8;
     background-size: cover;
-    background: url(../img/banner-bg.jpg) no-repeat center center;
+    background: url(../img/lowell.jpg) no-repeat center center;
+}
+
+.banner.altbanner {
+    padding: 100px 0;
+    color: #f8f8f8;
+    background-size: cover;
+    background: url(../img/pen.jpg) no-repeat center center;
 }
 
 .banner h2 {
