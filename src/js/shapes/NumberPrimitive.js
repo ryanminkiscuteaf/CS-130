@@ -17,17 +17,13 @@ class NumberPrimitive extends React.Component {
 	constructor() {
 		super();
 
+		// Event handlers
 		this.handleKeyDown = this.handleKeyDown.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
-
-		// Add event listeners
-		ee.addListener(Event.CONJURER_CLICK, this.handleClick.bind(this));
+		this.handleClick = this.handleClick.bind(this);
 	}
 
 	componentWillMount() {
-		console.log("Comp will mount");
-		console.log("Number Primitive " + this.props.id);
-
 		var style = this.props.style;
 		this.style = {
 			top: style.top || 0,
@@ -55,8 +51,6 @@ class NumberPrimitive extends React.Component {
 		// Placeholder number
 		this.defaultValue = this.props.value.toString();
 
-		console.log(this.props);
-
 		this.state = {
 			value: this.defaultValue,
 			curColNum: this.defaultValue.length,
@@ -66,14 +60,22 @@ class NumberPrimitive extends React.Component {
 			hasKeyEvents: false 
 		};
 
-		// Propagate state value to parent
-		//ee.emitEvent(Event.NUMBER_PRIMITIVE_UPDATE_VALUE, [this.props.id, this.state.value]);
+		this.shape = this.props.shape;
+
+		// Add event listener
+		ee.addListener(Event.CONJURER_CLICK, this.handleClick);
+	}
+
+	componentWillUnmount() {
+		// Remove event listener
+		ee.removeListener(Event.CONJURER_CLICK, this.handleClick);
 	}
 
 	componentWillReceiveProps() {
 		var style = this.props.style;
 		this.style.top = style.top;
 		this.style.left = style.left;
+		this.style.backgroundColor = style.backgroundColor || this.style.backgroundColor;
 
 		var curState = this.state;
 		curState.cursorX = this.getLeftmostPos() + (curState.value.length * this.style.charWidth);
@@ -121,7 +123,7 @@ class NumberPrimitive extends React.Component {
 			this.updateState(curState);
 
 			// Propagate state value to parent
-			ee.emitEvent(Event.NUMBER_PRIMITIVE_UPDATE_VALUE, [this.props.id, curState.value]);
+			this.shape.value = curState.value;
 
 			window.removeEventListener('keydown', this.handleKeyDown, false);
 			window.removeEventListener('keypress', this.handleKeyPress, false);
@@ -210,7 +212,7 @@ class NumberPrimitive extends React.Component {
 			left: this.props.style.left,
 			width: this.style.width,
 			height: this.style.height,
-			backgroundColor: this.style.backgroundColor
+			backgroundColor: this.props.style.backgroundColor
 		};
 	}
 
