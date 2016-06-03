@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Link } from 'react-router';
 
 class Section extends React.Component {
 
@@ -17,6 +18,16 @@ class Section extends React.Component {
 		);
 	}
 
+	renderButton() {
+		return (
+			<ul className="list-inline">
+          <li>
+          		<Link to="magic-room" className="btn btn-default btn-lg">{this.props.button}</Link>
+          </li>
+      </ul>
+		);
+	}
+
 	renderA() {
 		return (
 			<div className="content-section-a">
@@ -28,6 +39,7 @@ class Section extends React.Component {
 	                    <h2 className="section-heading">{this.props.title}</h2>
 	                    <p className="lead">{this.props.body}</p>
 	                    {this.props.list.length > 0 && this.renderList()}
+	                    {this.props.button != "" && this.renderButton()}
 	                </div>
 	                <div className="col-lg-5 col-lg-offset-2 col-sm-6">
 	                    <img className="img-responsive" src={this.props.img} alt=""/>
@@ -49,6 +61,7 @@ class Section extends React.Component {
 	                    <h2 className="section-heading">{this.props.title}</h2>
 	                    <p className="lead">{this.props.body}</p>
 	                    {this.props.list.length > 0 && this.renderList()}
+	                    {this.props.button != "" && this.renderButton()}
 	                </div>
 	                <div className="col-lg-5 col-sm-pull-6  col-sm-6">
 	                    <img className="img-responsive" src={this.props.img} alt=""/>
