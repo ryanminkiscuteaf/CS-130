@@ -2,7 +2,7 @@
  * Created by aman on 5/18/16.
  */
 
-let DEFAULT_COLOR = "#0000ff";
+let Color = require('./ColorConstants');
 
 class Shape {
     constructor ({id, type, top, left, width, height, color}={}) {
@@ -12,7 +12,7 @@ class Shape {
         this.left = left || 0;
         this.width = width || 50;
         this.height = height || 50;
-        this.color = color || DEFAULT_COLOR;
+        this.color = color || Color.NODE;
     }
 
     copy () {
