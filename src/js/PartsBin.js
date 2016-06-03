@@ -17,15 +17,27 @@ class PartsBin extends React.Component {
 		super();
 
 		// Initialize event listeners
-		ee.addListener(Event.PARTS_BIN_ADD_ITEM_EVENT, this.addItem.bind(this));
-		ee.addListener(Event.PARTS_BIN_REMOVE_ITEM_EVENT, this.removeItem.bind(this));
-		ee.addListener(Event.PARTS_BIN_REPLACE_ITEM_EVENT, this.replaceItem.bind(this));
+		this.addItem = this.addItem.bind(this);
+		this.removeItem = this.removeItem.bind(this);
+		this.replaceItem = this.replaceItem.bind(this);
 	}
 
 	componentWillMount() {
 		this.state = {
-			items: new Map()
+			items: new Map(this.props.initialItems.map(item => [item.id, item]))
 		}
+
+		// Add event listeners
+		ee.addListener(Event.PARTS_BIN_ADD_ITEM_EVENT, this.addItem);
+		ee.addListener(Event.PARTS_BIN_REMOVE_ITEM_EVENT, this.removeItem);
+		ee.addListener(Event.PARTS_BIN_REPLACE_ITEM_EVENT, this.replaceItem);
+	}
+
+	componentWillUnmount() {
+		// Remove event listeners
+		ee.removeListener(Event.PARTS_BIN_ADD_ITEM_EVENT, this.addItem);
+		ee.removeListener(Event.PARTS_BIN_REMOVE_ITEM_EVENT, this.removeItem);
+		ee.removeListener(Event.PARTS_BIN_REPLACE_ITEM_EVENT, this.replaceItem);
 	}
 
 	/**
