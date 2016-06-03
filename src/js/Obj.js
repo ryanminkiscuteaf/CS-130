@@ -2,7 +2,7 @@
 
 import Shape from './Shape';
 
-let ANCHOR_COLOR = "#903fd1";
+let Color = require('./ColorConstants');
 
 class Obj {
     constructor ({id, ref, x, y, shapes, width, height, children}={}) {
@@ -48,10 +48,11 @@ class Obj {
             right : this.right(),
             bottom : this.bottom()
         };
-        return ((point.x > bounds.left)
-            && (point.x < bounds.right)
-            && (point.y > bounds.top)
-            && (point.y < bounds.bottom));
+        
+        return ((point.x >= bounds.left)
+            && (point.x <= bounds.right)
+            && (point.y >= bounds.top)
+            && (point.y <= bounds.bottom));
     }
     
     // TODO: getCollision returns parent and anchor coordinates
@@ -60,8 +61,9 @@ class Obj {
         // didCollide() is a helper for getCollision
         var newOrigin = null;
         var didCollide = function (candidate) {
+
             // get shapes that are anchors
-            var anchors = candidate.shapes.filter(shape => shape.color === ANCHOR_COLOR);
+            var anchors = candidate.shapes.filter(shape => shape.color === Color.ANCHOR);
 
             // get absolute coordinates for anchors
             var coordinates = anchors.map(anchor => ({x: anchor.left + candidate.x, y: anchor.top + candidate.y}));
@@ -69,21 +71,10 @@ class Obj {
             // check to see if any of candidate's anchors are in obj's bounding rectangle
             for (let coordinate of coordinates) {
                 if (this.inBounds(coordinate)) {
-                    newOrigin = {x: coordinate.x - candidate.x, y: coordinate.y - candidate.y};
-                    
-                    // do some math to try to prevent siblings from occluding each other
-                    var xs = coordinates.map(c => c.x - candidate.x);
-                    var x_max = Math.max(...xs);
-                    var x_min = Math.min(...xs);
-                    var x_mid = (x_max - x_min)/2;
-                    var width = x_max - x_min;
-                    var index = xs.findIndex(x => x === coordinate.x - candidate.x);
-                    var x = (index >= xs.length/2)
-                        ? x_mid + index * width * 0.25
-                        : x_mid - (index + 1) * width;
-                    
-                    newOrigin = {x: x, y: coordinate.y - candidate.y};
-                    
+
+                    var head = this.shapes.filter(shape => shape.color !== Color.ANCHOR)[0];
+                    newOrigin = {x: coordinate.x - candidate.x - head.left, y: coordinate.y - candidate.y};
+
                     return true;
                 }
             }
@@ -107,7 +98,30 @@ class Obj {
             ? [this]
             : [this].concat(...this.children.map(c => c.getFamily()));
     }
-    
+
+    getHead() {
+        var numberHead = this.getNumberNode();
+        var operatorHead = this.getOperatorNode();
+
+        if (numberHead !== null && operatorHead === null)
+            return numberHead;
+
+        if (operatorHead !== null && numberHead === null)
+            return operatorHead;
+
+        return null;
+    }
+
+    getNumberNode() {
+        var shapes = this.shapes.filter(shape => shape.type === 'number');
+        return shapes.length == 1 ? shapes[0] : null;
+    }
+
+    getOperatorNode() {
+        var shapes = this.shapes.filter(shape => shape.type === 'operator');
+        return shapes.length == 1 ? shapes[0] : null;
+    }
+
     // TODO: refactor [].concat(...arrs) pattern to a merge() function
 }
 
