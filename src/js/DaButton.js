@@ -66,7 +66,7 @@ class DaButton extends React.Component {
 	  	left: this.style.left,
 	  	width: this.style.width,
 	  	height: this.style.height,
-	  	backgroundColor: this.style.backgroundColor
+	  	backgroundColor: this.props.style.backgroundColor || this.style.backgroundColor
   	};
   }
 
