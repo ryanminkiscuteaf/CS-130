@@ -27,7 +27,22 @@ module.exports = {
         test: /\.js$/,
         include: /linebreak/,
         loader: 'transform?brfs'
-      }
+      },
+
+      {
+        test: /\.css$/,
+        loader: 'style!css!'
+      },
+
+      {
+        test: /\.(eot|svg|ttf|woff|woff2)$/,
+        loader: 'file?name=public/fonts/[name].[ext]'
+      },
+
+      {
+        test: /\.(jpg|png|gif)$/,
+        loader: 'url-loader?limit=200000'
+      },
     ],
 
     postLoaders: [{
