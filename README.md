@@ -1,4 +1,7 @@
-# conjurer
+# CS-130
+UCLA CS 130 Software Engineering, Spring 2016
+
+=======
 
 If you've tried to run this project before, please delete the node_modules directory and run npm install again.
 
